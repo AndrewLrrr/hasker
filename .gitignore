@@ -1,0 +1,6 @@
+.idea
+virtenv
+db.*
+*/__pycache__/
+media/
+*.pyc
