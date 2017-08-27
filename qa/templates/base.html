@@ -23,7 +23,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="/">Hasker</a>
+                    <a class="navbar-brand" href="{% url 'qa:index' %}">Hasker</a>
                 </div>
                 <div class="collapse navbar-collapse" id="navbar-collapse">
                     <div class="pull-right navbar-utils-wrapper">
@@ -36,8 +36,8 @@
                             </div>
                         </form>
                         <div class="pull-right">
-                            <a href="/login" class="navbar-simple-text">Log In</a>
-                            <a href="/singup" class="btn btn-default navbar-btn">Sing Up</a>
+                            <a href="{% url 'qa:login' %}" class="navbar-simple-text">Log In</a>
+                            <a href="{% url 'qa:singup' %}" class="btn btn-default navbar-btn">Sing Up</a>
                         </div>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                 {% block content %}{% endblock content %}
             </div>
             <div class="col-sm-5 col-md-4">
-                <a class="btn btn-primary btn-ask">Ask!</a>
+                <a href="{% url 'qa:ask' %}" class="btn btn-primary btn-ask">Ask!</a>
                 <div class="mobile-separator"></div>
                 <div class="trends">
                     <h2 class="text-center">Trending</h2>

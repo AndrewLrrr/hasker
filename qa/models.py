@@ -1,19 +1,36 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import ugettext_lazy as _
 
 # TODO: Спросить у Станислава, есть ли возможность сгенерировать составной первичный ключ
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, unique=True)
-    avatar = models.FileField(blank=True)
+class User(AbstractUser):
+    username = models.CharField(
+        _('Login'),
+        max_length=150,
+        unique=True,
+        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
+        validators=[AbstractUser.username_validator],
+        error_messages={
+            'unique': _("A user with that login already exists."),
+        },
+    )
+    email = models.EmailField(
+        _('Email'),
+        unique=True,
+        error_messages={
+            'unique': _("A user with that email already exists."),
+        },
+    )
+    avatar = models.FileField(_('Avatar'), blank=True, null=True)
 
     def get_url(self):
-        return reverse('qa:profile', kwargs={'username': self.user.username})
+        return reverse('qa:profile', kwargs={'username': self.username})
 
 
 class Tag(models.Model):
