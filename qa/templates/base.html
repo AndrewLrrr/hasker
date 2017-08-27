@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'qa/css/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'qa/css/style.css' %}"/>
+    <title>
+        {% block title %}Hasker application{% endblock title %}
+    </title>
+</head>
+<body>
+<div id="wrapper">
+    <header>
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">Hasker</a>
+                </div>
+                <div class="collapse navbar-collapse" id="navbar-collapse">
+                    <div class="pull-right navbar-utils-wrapper">
+                        <form class="navbar-form navbar-left">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search" id="searchForm">
+                                <label class="input-group-addon" for="searchForm">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                </label>
+                            </div>
+                        </form>
+                        <div class="pull-right">
+                            <a href="/login" class="navbar-simple-text">Log In</a>
+                            <a href="/singup" class="btn btn-default navbar-btn">Sing Up</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="content">
+        {% block content %}{% endblock content %}
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="{% static 'qa/js/jquery-3.2.1.js' %}"></script>
+<script type="text/javascript" src="{% static 'qa/js/bootstrap.js' %}"></script>
+<script type="text/javascript" src="{% static 'qa/js/scripts.js' %}"></script>
+</html>

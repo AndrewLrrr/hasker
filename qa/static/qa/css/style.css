@@ -1,0 +1,32 @@
+.navbar-simple-text {
+    float: left;
+    padding: 15px;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+#wrapper header .navbar-brand {
+    color: #5a5a5a;
+    font-weight: 500;
+    font-size: 24px;
+}
+
+#wrapper .navbar-form input.form-control {
+    border-right: none;
+    box-shadow: none;
+}
+
+#wrapper .navbar-form input.form-control:focus {
+    border-color: #ccc;
+}
+
+#wrapper .navbar-form .input-group-addon {
+    background: #FFF;
+    cursor: pointer;
+}
+
+@media (min-width: 768px) {
+    #wrapper .navbar-form .input-group {
+        width: 300px;
+    }
+}

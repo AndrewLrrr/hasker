@@ -38,7 +38,7 @@ class SearchView(View):
 
 class SingupView(View):
     def get(self, request):
-        return HttpResponse('singup')
+        return render(request, 'qa/user_singup.html')
 
 
 class LoginView(View):
