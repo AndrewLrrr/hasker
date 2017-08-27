@@ -43,7 +43,7 @@ class SingupView(View):
 
 class LoginView(View):
     def get(self, request):
-        return HttpResponse('login')
+        return render(request, 'qa/user_login.html')
 
 
 class LogoutView(View):

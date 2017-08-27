@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'qa/css/bootstrap.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'qa/css/style.css' %}"/>
     <title>
-        {% block title %}Hasker application{% endblock title %}
+        {% block title %}Hasker{% endblock title %}
     </title>
 </head>
 <body>
@@ -44,8 +44,35 @@
             </div>
         </nav>
     </header>
-    <div class="content">
-        {% block content %}{% endblock content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-7 col-md-8 content">
+                {% block content %}{% endblock content %}
+            </div>
+            <div class="col-sm-5 col-md-4">
+                <a class="btn btn-primary btn-ask">Ask!</a>
+                <div class="mobile-separator"></div>
+                <div class="trends">
+                    <h2 class="text-center">Trending</h2>
+                    <div class="trend-item">
+                        <span class="label label-primary">100</span>
+                        <a href="#" class="trent-link">How to Python</a>
+                    </div>
+                    <div class="trend-item">
+                        <span class="label label-primary">83</span>
+                        <a href="#" class="trent-link">How to PHP</a>
+                    </div>
+                    <div class="trend-item">
+                        <span class="label label-primary">80</span>
+                        <a href="#" class="trent-link">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam maximus, erat sit amet fringilla vestibulum</a>
+                    </div>
+                    <div class="trend-item">
+                        <span class="label label-primary">78</span>
+                        <a href="#" class="trent-link">How to Java</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

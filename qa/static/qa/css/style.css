@@ -1,8 +1,28 @@
+#wrapper {
+    font-size: 16px;
+}
+
 .navbar-simple-text {
     float: left;
     padding: 15px;
     font-size: 16px;
     line-height: 20px;
+}
+
+#wrapper h1 {
+    font-size: 24px;
+}
+
+#wrapper h2 {
+    font-size: 23px;
+}
+
+#wrapper .btn {
+    font-size: 16px;
+}
+
+#wrapper input {
+    font-size: 16px;
 }
 
 #wrapper header .navbar-brand {
@@ -25,8 +45,65 @@
     cursor: pointer;
 }
 
+.form-base {
+    max-width: 400px;
+    margin: 30px auto;
+}
+
+.form-base input:focus {
+    text-align: left;
+    box-shadow: none;
+    border: 1px solid #ccc;
+}
+
+.btn-ask {
+    display: block;
+    max-width: 195px;
+    margin: 20px auto;
+}
+
+.trends {
+    margin: auto;
+}
+
+.trend-item {
+    margin: 15px 0;
+}
+
+.trend-item .label-primary {
+    display: inline-block;
+    width: 40px;
+    background-color: #337ab7;
+    padding: 7px 5px;
+    margin-right: 5px;
+    font-size: 16px;
+}
+
+.trend-item .trent-link {
+    color: #000;
+    cursor: pointer;
+}
+
 @media (min-width: 768px) {
     #wrapper .navbar-form .input-group {
         width: 300px;
+    }
+    .trends {
+        max-width: 300px;
+        margin: auto;
+    }
+    .btn-ask {
+        margin-bottom: 40px;
+    }
+}
+
+@media (max-width: 767px) {
+    .content {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+    }
+    .mobile-separator {
+        margin: 0 -15px;
+        border-bottom: 1px solid #ccc;
     }
 }
