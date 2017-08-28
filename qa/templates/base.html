@@ -39,7 +39,7 @@
                             {% if user.is_authenticated %}
                                 <div class="auth-user-block">
                                     <a href="{{ user.get_url }}">
-                                        <img src="{{ user.avatar.url }}" alt="" class="img-rounded">
+                                        <img src="{{ user.get_avatar_url }}" alt="" class="img-rounded">
                                     </a>
                                     <div class="auth-user-links">
                                         <a href="{{ user.get_url }}"

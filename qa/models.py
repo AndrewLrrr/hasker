@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -42,6 +43,9 @@ class User(AbstractUser):
 
     def get_url(self):
         return reverse('qa:profile', kwargs={'username': self.username})
+
+    def get_avatar_url(self):
+        return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
 
 
 class Tag(models.Model):
