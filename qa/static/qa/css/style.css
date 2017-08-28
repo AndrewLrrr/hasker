@@ -40,22 +40,37 @@
     width: 34px;
 }
 
-.auth-user-links {
+.auth-user-control {
     float: right;
     margin-top: 5px;
 }
 
-.auth-user-links a {
+.auth-user-control a {
     margin-left: 15px;
     font-size: 17px;
 }
 
-.auth-user-links a.logout {
+.auth-user-control form.logout {
+    float: right;
+    margin-left: 15px;
+    margin-top: 1px;
+}
+
+.auth-user-control form.logout button {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.auth-user-control form.logout span {
     color: #5a5a5a;
     display: block;
     font-size: 19px;
-    float: right;
-    margin-top: 1px;
+    cursor: pointer;
+}
+
+.auth-user-control form.logout span:hover {
+    text-decoration: underline;
 }
 
 #wrapper .navbar-form input.form-control {

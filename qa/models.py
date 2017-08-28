@@ -12,7 +12,13 @@ from qa.fields import ContentTypeRestrictedFileField
 # TODO: Спросить у Станислава, есть ли возможность сгенерировать составной первичный ключ
 
 USER_AVATAR_MAX_SIZE_IN_MB = 1
-USER_AVATAR_ALLOWED_CONTENT_TYPES = ('image/gif', 'image/jpeg', 'image/pjpeg', 'image/png', )
+
+USER_AVATAR_ALLOWED_CONTENT_TYPES = (
+    'image/gif',
+    'image/jpeg',
+    'image/pjpeg',
+    'image/png',
+)
 
 
 class User(AbstractUser):

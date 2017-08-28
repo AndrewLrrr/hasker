@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -78,8 +78,9 @@ class LoginView(View):
 
 
 class LogoutView(View):
-    def get(self, request):
-        return HttpResponse('logout')
+    def post(self, request):
+        logout(request)
+        return redirect('qa:index')
 
 
 class ProfileView(View):
