@@ -3,11 +3,7 @@
 {% block content %}
     <h1 class="text-center">Sing up to continue with Hasker</h1>
     <form class="form-base" method="post" action="{% url 'qa:singup' %}">
-        {% include 'qa/form_errors.html' %}
-        <fieldset>
-            {% csrf_token %}
-            {% include 'qa/form_template.html' %}
-        </fieldset>
+        {% include 'qa/form_template.html' %}
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Sing Up</button>
         </div>

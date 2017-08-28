@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
@@ -11,7 +12,8 @@ from forms import UserSingUpForm
 
 class IndexView(View):
     def get(self, request):
-        return HttpResponse('index')
+        message = 'Hello ' + request.user.username + '!' if request.user.is_authenticated() else 'Nobody'
+        return HttpResponse(message)
 
 
 class PopularView(View):
@@ -49,17 +51,30 @@ class SingUpView(View):
 
     def post(self, request):
         form = self.form_class(request.POST)
+        print form.errors
         if form.is_valid():
             user = form.save()
-            if user is not None:
-                login(request, user)
-                return redirect('qa:index')
+            login(request, user)
+            return redirect('qa:index')
         return render(request, self.template, {'form': form})
 
 
+# TODO: Реализовать remember me
 class LoginView(View):
+    form_class = AuthenticationForm
+    template = 'qa/user_login.html'
+
     def get(self, request):
-        return render(request, 'qa/user_login.html')
+        form = self.form_class(None)
+        return render(request, self.template, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('qa:index')
+        return render(request, self.template, {'form': form})
 
 
 class LogoutView(View):
