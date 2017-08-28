@@ -51,7 +51,6 @@ class SingUpView(View):
 
     def post(self, request):
         form = self.form_class(request.POST, request.FILES)
-        print form.errors
         if form.is_valid():
             user = form.save()
             login(request, user)
@@ -59,7 +58,6 @@ class SingUpView(View):
         return render(request, self.template, {'form': form})
 
 
-# TODO: Реализовать remember me
 class LoginView(View):
     form_class = AuthenticationForm
     template = 'qa/user_login.html'
@@ -72,6 +70,8 @@ class LoginView(View):
         form = self.form_class(data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            if not request.POST.get('remember_me', None):
+                request.session.set_expiry(0)
             login(request, user)
             return redirect('qa:index')
         return render(request, self.template, {'form': form})
