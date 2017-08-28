@@ -2,5 +2,5 @@
 virtenv
 db.*
 */__pycache__/
-media/
+qa/media
 *.pyc

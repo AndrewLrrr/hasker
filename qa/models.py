@@ -6,7 +6,12 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
+from qa.fields import ContentTypeRestrictedFileField
+
 # TODO: Спросить у Станислава, есть ли возможность сгенерировать составной первичный ключ
+
+USER_AVATAR_MAX_SIZE_IN_MB = 1
+USER_AVATAR_ALLOWED_CONTENT_TYPES = ('image/gif', 'image/jpeg', 'image/pjpeg', 'image/png', )
 
 
 class User(AbstractUser):
@@ -27,7 +32,13 @@ class User(AbstractUser):
             'unique': _("A user with that email already exists."),
         },
     )
-    avatar = models.FileField(_('Avatar'), blank=True, null=True)
+    avatar = ContentTypeRestrictedFileField(
+        _('Avatar'),
+        content_types=USER_AVATAR_ALLOWED_CONTENT_TYPES,
+        max_upload_size=(USER_AVATAR_MAX_SIZE_IN_MB * 1024 * 1024),
+        blank=True,
+        null=True
+    )
 
     def get_url(self):
         return reverse('qa:profile', kwargs={'username': self.username})

@@ -17,6 +17,8 @@ DATABASES = {
     }
 }
 
+MEDIA_ROOT = 'qa/media'
+
 if DEBUG:
     try:
         import debug_toolbar

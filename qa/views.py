@@ -50,7 +50,7 @@ class SingUpView(View):
         return render(request, self.template, {'form': form})
 
     def post(self, request):
-        form = self.form_class(request.POST)
+        form = self.form_class(request.POST, request.FILES)
         print form.errors
         if form.is_valid():
             user = form.save()
