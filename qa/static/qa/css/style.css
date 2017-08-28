@@ -31,6 +31,33 @@
     font-size: 24px;
 }
 
+.auth-user-block {
+    padding: 8px;
+}
+
+.auth-user-block img {
+    height: 34px;
+    width: 34px;
+}
+
+.auth-user-links {
+    float: right;
+    margin-top: 5px;
+}
+
+.auth-user-links a {
+    margin-left: 15px;
+    font-size: 17px;
+}
+
+.auth-user-links a.logout {
+    color: #5a5a5a;
+    display: block;
+    font-size: 19px;
+    float: right;
+    margin-top: 1px;
+}
+
 #wrapper .navbar-form input.form-control {
     border-right: none;
     box-shadow: none;

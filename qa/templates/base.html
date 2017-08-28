@@ -36,8 +36,21 @@
                             </div>
                         </form>
                         <div class="pull-right">
-                            <a href="{% url 'qa:login' %}" class="navbar-simple-text">Log In</a>
-                            <a href="{% url 'qa:singup' %}" class="btn btn-default navbar-btn">Sing Up</a>
+                            {% if user.is_authenticated %}
+                                <div class="auth-user-block">
+                                    <a href="{{ user.get_url }}">
+                                        <img src="{{ user.avatar.url }}" alt="" class="img-rounded">
+                                    </a>
+                                    <div class="auth-user-links">
+                                        <a href="{{ user.get_url }}"
+                                           class="profile">{{ user.username|truncatechars:15 }}</a>
+                                        <a href="{% url 'qa:logout' %}" class="glyphicon glyphicon-log-out logout"></a>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <a href="{% url 'qa:login' %}" class="navbar-simple-text">Log In</a>
+                                <a href="{% url 'qa:singup' %}" class="btn btn-default navbar-btn">Sing Up</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -64,7 +77,8 @@
                     </div>
                     <div class="trend-item">
                         <span class="label label-primary">80</span>
-                        <a href="#" class="trent-link">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam maximus, erat sit amet fringilla vestibulum</a>
+                        <a href="#" class="trent-link">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam
+                            maximus, erat sit amet fringilla vestibulum</a>
                     </div>
                     <div class="trend-item">
                         <span class="label label-primary">78</span>
