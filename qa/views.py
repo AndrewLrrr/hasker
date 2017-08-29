@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from forms import UserSingUpForm
+from forms import UserSingUpForm, UserProfileForm
 from qa.decorators import logout_required
 
 
@@ -95,5 +95,26 @@ class LogoutView(View):
 
 
 class ProfileView(View):
+    form_class = UserProfileForm
+    template = 'qa/user_profile.html'
+
+    @method_decorator(login_required)
     def get(self, request, username):
-        return HttpResponse('profile')
+        user = request.user
+        if user.username != username:
+            return redirect('qa:profile', username=user.username)
+        form = self.form_class(initial={'email': user.email})
+        return render(request, self.template, {'form': form, 'user': user})
+
+    @method_decorator(login_required)
+    def post(self, request, username):
+        user = request.user
+        form = self.form_class(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            user.email = form.cleaned_data.get('email')
+            avatar = form.cleaned_data.get('avatar')
+            if avatar:
+                user.avatar = avatar
+            user.save()
+            return redirect('qa:profile', username=username)
+        return render(request, self.template, {'form': form, 'user': user})

@@ -24,6 +24,13 @@ class ContentTypeRestrictedFileField(FileField):
 
         super(ContentTypeRestrictedFileField, self).__init__(*args, **kwargs)
 
+    def save_form_data(self, instance, data):
+        if data is not None:
+            _file = getattr(instance, self.attname)
+            if _file != data:
+                _file.delete(save=False)
+        super(ContentTypeRestrictedFileField, self).save_form_data(instance, data)
+
     def clean(self, *args, **kwargs):
         data = super(ContentTypeRestrictedFileField, self).clean(*args, **kwargs)
         _file = data.file

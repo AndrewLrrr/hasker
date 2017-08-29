@@ -102,6 +102,13 @@
     margin-top: 10px;
 }
 
+.form-base .img-rounded {
+    max-width: 110px;
+    max-height: 110px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
 .control-item input:not([type=file]) {
     display: block;
     width: 100%;
@@ -136,6 +143,12 @@
 .form-errors ul {
     margin-bottom: 0;
     padding-left: 20px;
+}
+
+p.profile-login {
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+    margin-bottom: 20px
 }
 
 .btn-ask {
