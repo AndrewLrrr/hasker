@@ -2,12 +2,15 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.views import View
 
 from forms import UserSingUpForm
+from qa.decorators import logout_required
 
 
 class IndexView(View):
@@ -44,12 +47,17 @@ class SearchView(View):
 class SingUpView(View):
     form_class = UserSingUpForm
     template = 'qa/user_singup.html'
+    redirect = 'qa:index'
 
+    @method_decorator(logout_required('qa:index'))
     def get(self, request):
         form = self.form_class(None)
         return render(request, self.template, {'form': form})
 
+    @method_decorator(logout_required('qa:index'))
     def post(self, request):
+        if request.user.is_authenticated():
+            return redirect('qa:index')
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
@@ -62,10 +70,12 @@ class LoginView(View):
     form_class = AuthenticationForm
     template = 'qa/user_login.html'
 
+    @method_decorator(logout_required('qa:index'))
     def get(self, request):
         form = self.form_class(None)
         return render(request, self.template, {'form': form})
 
+    @method_decorator(logout_required('qa:index'))
     def post(self, request):
         form = self.form_class(data=request.POST)
         if form.is_valid():
@@ -78,6 +88,7 @@ class LoginView(View):
 
 
 class LogoutView(View):
+    @method_decorator(login_required)
     def post(self, request):
         logout(request)
         return redirect('qa:index')
