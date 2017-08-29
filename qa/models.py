@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import models
@@ -19,6 +22,12 @@ USER_AVATAR_ALLOWED_CONTENT_TYPES = (
     'image/pjpeg',
     'image/png',
 )
+
+
+def unique_filename(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = '{}.{}'.format(uuid.uuid4().hex, ext)
+    return os.path.join('uploads', filename)
 
 
 class User(AbstractUser):
@@ -43,6 +52,7 @@ class User(AbstractUser):
         _('Avatar'),
         content_types=USER_AVATAR_ALLOWED_CONTENT_TYPES,
         max_upload_size=(USER_AVATAR_MAX_SIZE_IN_MB * 1024 * 1024),
+        upload_to=unique_filename,
         blank=True,
         null=True
     )
