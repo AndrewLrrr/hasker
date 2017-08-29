@@ -13,7 +13,7 @@ class UserSingUpForm(UserCreationForm):
         fields = ('username', 'email', 'password1', 'password2', 'avatar', )
 
 
-class UserProfileForm(forms.ModelForm):
+class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('email', 'avatar', )

@@ -38,11 +38,11 @@
                         <div class="pull-right">
                             {% if user.is_authenticated %}
                                 <div class="auth-user-block">
-                                    <a href="{{ user.get_url }}">
+                                    <a href="{% url 'qa:settings' %}">
                                         <img src="{{ user.get_avatar_url }}" alt="" class="img-rounded">
                                     </a>
                                     <div class="auth-user-control">
-                                        <a href="{{ user.get_url }}"
+                                        <a href="{% url 'qa:settings' %}"
                                            class="profile">{{ user.username|truncatechars:15 }}</a>
                                         <form method="post" action="{% url 'qa:logout' %}" class="logout">
                                             {% csrf_token %}

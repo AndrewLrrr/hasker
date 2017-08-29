@@ -57,9 +57,6 @@ class User(AbstractUser):
         null=True
     )
 
-    def get_url(self):
-        return reverse('qa:profile', kwargs={'username': self.username})
-
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
 
