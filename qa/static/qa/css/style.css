@@ -109,7 +109,9 @@
     margin-bottom: 15px;
 }
 
-.control-item > input:not([type=file]),
+.control-item > input[type=text],
+.control-item > input[type=email],
+.control-item > input[type=password],
 .control-item > textarea {
     display: block;
     width: 100%;
@@ -128,16 +130,22 @@
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
-.control-item > input:not([type=file]) {
+.control-item > input[type=text],
+.control-item > input[type=email],
+.control-item > input[type=password] {
     height: 34px;
 }
 
-.control-item > input:not([type=file]):focus,
+.control-item > input[type=text]:focus,
+.control-item > input[type=email]:focus,
+.control-item > input[type=password]:focus,
 .control-item > textarea:focus {
     outline: 0;
 }
 
-.has-error .control-item input:not([type=file]) {
+.has-error .control-item > input[type=text],
+.has-error .control-item > input[type=email],
+.has-error .control-item > input[type=password] {
     border: 1px solid #a94442;
 }
 

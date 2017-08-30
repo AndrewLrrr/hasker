@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -118,7 +119,7 @@ class SettingsView(View):
     @method_decorator(login_required)
     def get(self, request):
         user = request.user
-        form = self.form_class(initial={'email': user.email})
+        form = self.form_class(instance=request.user)
         return render(request, self.template, {'form': form, 'user': user})
 
     @method_decorator(login_required)
@@ -131,5 +132,6 @@ class SettingsView(View):
             if avatar:
                 user.avatar = avatar
             user.save()
+            messages.info(request, 'The changes have been saved!')
             return redirect('qa:settings')
         return render(request, self.template, {'form': form, 'user': user})

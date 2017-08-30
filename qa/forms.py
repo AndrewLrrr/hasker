@@ -7,6 +7,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from qa.models import User, Question
+from qa.widgets import ClearableImageInput
 
 
 class UserSingUpForm(UserCreationForm):
@@ -19,6 +20,10 @@ class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('email', 'avatar', )
+
+    def __init__(self, *args, **kwargs):
+        super(UserSettingsForm, self).__init__(*args, **kwargs)
+        self.fields['avatar'].widget = ClearableImageInput()
 
 
 class QuestionAskForm(forms.ModelForm):
