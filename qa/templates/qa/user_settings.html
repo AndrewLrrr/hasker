@@ -2,9 +2,8 @@
 {% block title %}User Settings{% endblock title %}
 {% block content %}
 <h1 class="text-center">Settings</h1>
-<form class="form-base" method="post" action="{{ user.get_url }}" enctype="multipart/form-data">
+<form class="form-base" method="post" action="{% url 'qa:settings' %}" enctype="multipart/form-data">
     <p class="profile-login">Login - {{ user.username }}</p>
-    <div style="clear: both"></div>
     {% include 'qa/form_template.html' %}
     <img src="{{ user.get_avatar_url }}" alt="" class="img-rounded">
     <div class="form-group">

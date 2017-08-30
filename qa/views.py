@@ -5,12 +5,13 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from forms import UserSingUpForm, UserSettingsForm
+from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm
 from qa.decorators import logout_required
+from qa.models import Question
 
 
 class IndexView(View):
@@ -24,14 +25,12 @@ class PopularView(View):
         return HttpResponse('popular')
 
 
-class AskView(View):
-    def get(self, request):
-        return HttpResponse('ask')
-
-
 class QuestionView(View):
+    template = 'qa/question_detail.html'
+
     def get(self, request, slug):
-        return HttpResponse('question')
+        question = get_object_or_404(Question, slug=slug)
+        return render(request, self.template, {'question': question})
 
 
 class TagView(View):
@@ -44,10 +43,30 @@ class SearchView(View):
         return HttpResponse('search')
 
 
+class AskView(View):
+    form_class = QuestionAskForm
+    template = 'qa/question_form.html'
+
+    @method_decorator(login_required)
+    def get(self, request):
+        form = self.form_class(None)
+        return render(request, self.template, {'form': form})
+
+    @method_decorator(login_required)
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            tags = form.cleaned_data['tags']
+            question.author = request.user
+            question.save(tags=tags)
+            return redirect(question.get_url())
+        return render(request, self.template, {'form': form})
+
+
 class SingUpView(View):
     form_class = UserSingUpForm
     template = 'qa/user_singup.html'
-    redirect = 'qa:index'
 
     @method_decorator(logout_required('qa:index'))
     def get(self, request):
@@ -56,8 +75,6 @@ class SingUpView(View):
 
     @method_decorator(logout_required('qa:index'))
     def post(self, request):
-        if request.user.is_authenticated():
-            return redirect('qa:index')
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()

@@ -109,10 +109,10 @@
     margin-bottom: 15px;
 }
 
-.control-item input:not([type=file]) {
+.control-item > input:not([type=file]),
+.control-item > textarea {
     display: block;
     width: 100%;
-    height: 34px;
     padding: 6px 12px;
     font-size: 14px;
     line-height: 1.5;
@@ -128,7 +128,12 @@
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
-.control-item input:not([type=file]):focus {
+.control-item > input:not([type=file]) {
+    height: 34px;
+}
+
+.control-item > input:not([type=file]):focus,
+.control-item > textarea:focus {
     outline: 0;
 }
 
@@ -177,6 +182,23 @@ p.profile-login {
 .trend-item .trent-link {
     color: #000;
     cursor: pointer;
+}
+
+/* Redefine jquery.tagsinput style */
+#wrapper #id_tags_tagsinput {
+    width: 100% !important;
+}
+
+#wrapper #id_tags_tag {
+    width: 100% !important;
+}
+
+#wrapper #id_tags_tag:focus {
+    border: none;
+}
+
+#wrapper .has-error #id_tags_tag {
+    border: none;
 }
 
 @media (min-width: 768px) {

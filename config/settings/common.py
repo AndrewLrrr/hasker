@@ -108,3 +108,14 @@ MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'qa.User'
 
 LOGIN_URL = '/login/'
+
+USER_AVATAR_MAX_SIZE_IN_MB = 1
+
+USER_AVATAR_ALLOWED_CONTENT_TYPES = (
+    'image/gif',
+    'image/jpeg',
+    'image/pjpeg',
+    'image/png',
+)
+
+TAGS_LIMIT = 3

@@ -4,24 +4,18 @@ from __future__ import unicode_literals
 import os
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import models
 from django.urls import reverse
+from django.utils.encoding import python_2_unicode_compatible
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from qa.fields import ContentTypeRestrictedFileField
 
 # TODO: Спросить у Станислава, есть ли возможность сгенерировать составной первичный ключ
-
-USER_AVATAR_MAX_SIZE_IN_MB = 1
-
-USER_AVATAR_ALLOWED_CONTENT_TYPES = (
-    'image/gif',
-    'image/jpeg',
-    'image/pjpeg',
-    'image/png',
-)
 
 
 def unique_filename(instance, filename):
@@ -50,8 +44,8 @@ class User(AbstractUser):
     )
     avatar = ContentTypeRestrictedFileField(
         _('Avatar'),
-        content_types=USER_AVATAR_ALLOWED_CONTENT_TYPES,
-        max_upload_size=(USER_AVATAR_MAX_SIZE_IN_MB * 1024 * 1024),
+        content_types=settings.USER_AVATAR_ALLOWED_CONTENT_TYPES,
+        max_upload_size=(settings.USER_AVATAR_MAX_SIZE_IN_MB * 1024 * 1024),
         upload_to=unique_filename,
         blank=True,
         null=True
@@ -61,14 +55,18 @@ class User(AbstractUser):
         return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
 
 
+@python_2_unicode_compatible
 class Tag(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    slug = models.CharField(max_length=255, unique=True)
+    name = models.CharField(_('Name'), max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
+@python_2_unicode_compatible
 class Question(models.Model):
     title = models.CharField(max_length=255, unique=True)
-    slug = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
     text = models.TextField()
     rating = models.IntegerField(default=0)
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -78,6 +76,19 @@ class Question(models.Model):
 
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})
+
+    def save(self, tags=(), *args, **kwargs):
+        if not self.pk:
+            self.slug = slugify(self.title)
+        super(Question, self).save(*args, **kwargs)
+        tag_objects = []
+        for tag in tags:
+            tag_object, _ = Tag.objects.get_or_create(name=tag)
+            tag_objects.append(tag_object)
+        self.tags.add(*tag_objects)
+
+    def __str__(self):
+        return self.title
 
 
 class Answer(models.Model):
