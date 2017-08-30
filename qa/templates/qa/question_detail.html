@@ -1,13 +1,54 @@
 {% extends "base.html" %}
 {% block title %}{{ question }}{% endblock title %}
 {% block content %}
-    <h1>{{ question }}</h1>
-    <p>{{ question.text }}</p>
-    {% if question.tags.exists %}
-        <ul>
-            {% for tag in question.tags.all %}
-                <li>{{ tag }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <h1 class="question-header">{{ question.title }}</h1>
+    <div class="row content-block">
+        <div class="col-xs-3 col-sm-2 col-lg-1">
+            <div class="rating-control">
+                <a href="#" class="vote-up glyphicon glyphicon-thumbs-up"></a>
+                <p class="rating">{{ question.rating }}</p>
+                <a href="#" class="vote-down glyphicon glyphicon-thumbs-down"></a>
+            </div>
+        </div>
+        <div class="col-xs-9 col-sm-10 col-lg-11">
+            <p>{{ question.text }}</p>
+            <div class="additional">
+                {% if question.tags.exists %}
+                    <div class="tag-list">
+                        {% for tag in question.tags.all %}
+                            <a class="label label-primary" href="#">{{ tag }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img src="{{ question.author.get_avatar_url }}" alt=""/>
+                    </div>
+                    <p class="text-center">{{ question.author.username }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="answer-form">
+        {% if form.errors %}
+            <div class="form-errors">
+                {% for key, error in form.errors.items %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form class="form-base" method="post" action="{% url 'qa:answer' %}">
+            {% csrf_token %}
+            <input type="hidden" name="question_id" value="{{ question.pk }}">
+            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                <label for="answer" class="control-label">Your answer</label>
+                <div class="control-item">
+                    <textarea id="answer" name="answer" rows="5" required="required"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </form>
+    </div>
 {% endblock content %}

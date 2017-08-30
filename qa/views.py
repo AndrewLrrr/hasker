@@ -44,6 +44,11 @@ class SearchView(View):
         return HttpResponse('search')
 
 
+class AnswerView(View):
+    def post(self, request):
+        pass
+
+
 class AskView(View):
     form_class = QuestionAskForm
     template = 'qa/question_form.html'

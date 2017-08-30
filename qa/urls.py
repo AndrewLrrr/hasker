@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^ask/$', AskView.as_view(), name='ask'),
     url(r'^popular/?$', PopularView.as_view(), name='popular'),
+    url(r'^answer/?$', AnswerView.as_view(), name='answer'),
     url(r'^question/(?P<slug>[^\s]+)/?$', QuestionView.as_view(), name='question'),
     url(r'^tag/(?P<slug>[^\s]+)/?$', TagView.as_view(), name='tag'),
     url(r'^search/?', SearchView.as_view(), name='search'),

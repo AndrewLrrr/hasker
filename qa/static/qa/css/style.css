@@ -31,13 +31,22 @@
     font-size: 24px;
 }
 
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    max-width: 34px;
+}
+
 .auth-user-block {
     padding: 8px;
 }
 
-.auth-user-block img {
-    height: 34px;
-    width: 34px;
+.auth-user-block .user-avatar {
+    float: left;
 }
 
 .auth-user-control {
@@ -178,11 +187,10 @@ p.profile-login {
     margin: 15px 0;
 }
 
-.trend-item .label-primary {
+#wrapper .label {
     display: inline-block;
-    width: 40px;
-    background-color: #337ab7;
-    padding: 7px 5px;
+    font-weight: normal;
+    padding: 7px;
     margin-right: 5px;
     font-size: 16px;
 }
@@ -190,6 +198,67 @@ p.profile-login {
 .trend-item .trent-link {
     color: #000;
     cursor: pointer;
+}
+
+.trend-item .label {
+    min-width: 45px;
+}
+
+.rating-control {
+    text-align: center;
+    font-size: 24px;
+}
+
+.rating-control a:hover,
+.rating-control a:focus {
+  text-decoration: none;
+}
+
+.content-block {
+    overflow:auto;
+    border-bottom: 1px solid #ccc;
+}
+
+h1.question-header {
+    margin-bottom: 20px;
+}
+
+.tag-list {
+    float: left;
+}
+
+.tag-list .label {
+    min-width: 65px;
+}
+
+.user-info {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    float: right;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+}
+
+.user-info p {
+    margin: 0;
+}
+
+.user-info .user-avatar {
+    width: 60px;
+    height: 60px;
+}
+
+.user-info .user-avatar img {
+    max-width: 60px;
+}
+
+.answer-form .form-base {
+    margin: 30px 0;
+    max-width: 100%;
+}
+
+.answer-form .form-base label {
+    font-size: 18px;
 }
 
 /* Redefine jquery.tagsinput style */
@@ -213,10 +282,12 @@ p.profile-login {
     #wrapper .navbar-form .input-group {
         width: 300px;
     }
+
     .trends {
         max-width: 300px;
         margin: auto;
     }
+
     .btn-ask {
         margin-bottom: 40px;
     }
@@ -227,6 +298,11 @@ p.profile-login {
         margin-bottom: 20px;
         border-bottom: 1px solid #ccc;
     }
+
+    .auth-user-block .user-avatar {
+        margin-bottom: 10px;
+    }
+
     .mobile-separator {
         margin: 0 -15px;
         border-bottom: 1px solid #ccc;
