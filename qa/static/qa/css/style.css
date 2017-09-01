@@ -211,12 +211,24 @@ p.profile-login {
 
 .rating-control a:hover,
 .rating-control a:focus {
-  text-decoration: none;
+    text-decoration: none;
 }
 
+.rating-control a.is_answer {
+    margin-bottom: 20px;
+    color: #eee;
+}
+
+.rating-control a.is_answer:hover,
+.rating-control a.is_answer:focus {
+    color: #f0ad4e;
+}
+
+
 .content-block {
-    overflow:auto;
     border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+    overflow: hidden;
 }
 
 h1.question-header {

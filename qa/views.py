@@ -5,12 +5,13 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm
+from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
 from qa.models import Question
 
@@ -26,14 +27,6 @@ class PopularView(View):
         return HttpResponse('popular')
 
 
-class QuestionView(View):
-    template = 'qa/question_detail.html'
-
-    def get(self, request, slug):
-        question = get_object_or_404(Question, slug=slug)
-        return render(request, self.template, {'question': question})
-
-
 class TagView(View):
     def get(self, request, slug):
         return HttpResponse('tag')
@@ -44,9 +37,26 @@ class SearchView(View):
         return HttpResponse('search')
 
 
-class AnswerView(View):
-    def post(self, request):
-        pass
+class QuestionView(View):
+    form_class = AnswerForm
+    template = 'qa/question_detail.html'
+
+    def get(self, request, slug):
+        form = self.form_class(None)
+        question = get_object_or_404(Question, slug=slug)
+        return render(request, self.template, {'question': question, 'form': form})
+
+    @method_decorator(login_required)
+    def post(self, request, slug):
+        form = self.form_class(request.POST)
+        question = get_object_or_404(Question, slug=slug)
+        if form.is_valid():
+            answer = form.save(commit=False)
+            answer.question = question
+            answer.author = request.user
+            answer.save()
+            return redirect(question.get_url())
+        return render(request, self.template, {'question': question, 'form': form})
 
 
 class AskView(View):

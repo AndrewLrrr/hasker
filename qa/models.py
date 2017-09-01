@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 import uuid
 
+import itertools
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -22,6 +23,19 @@ def unique_filename(instance, filename):
     ext = filename.split('.')[-1]
     filename = '{}.{}'.format(uuid.uuid4().hex, ext)
     return os.path.join('uploads', filename)
+
+
+class QuestionManager(models.Manager):
+    def new(self):
+        return self.all().order_by('-pub_date')
+
+    def popular(self):
+        return self.all().order_by('-rating')
+
+
+class AnswerManager(models.Manager):
+    def popular(self):
+        return self.all().order_by('-rating', '-pub_date')
 
 
 class User(AbstractUser):
@@ -66,7 +80,7 @@ class Tag(models.Model):
 @python_2_unicode_compatible
 class Question(models.Model):
     title = models.CharField(max_length=255, unique=True)
-    slug = models.SlugField(max_length=255, unique=True)
+    slug = models.SlugField(unique=True)
     text = models.TextField()
     rating = models.IntegerField(default=0)
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -74,12 +88,23 @@ class Question(models.Model):
     tags = models.ManyToManyField(Tag, related_name='question_tags')
     votes = models.ManyToManyField(User, through='QuestionVote', related_name='question_votes')
 
+    objects = QuestionManager()
+
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})
 
+    def slugify(self, string):
+        max_length = self._meta.get_field('slug').max_length
+        slug = orig = slugify(string)[:max_length]
+        for x in itertools.count(1):
+            if not Question.objects.filter(slug=self.slug).exists():
+                break
+            self.slug = '{}-{}'.format(orig[:max_length - len(str(x)) - 1], x)
+        return slug
+
     def save(self, tags=(), *args, **kwargs):
         if not self.pk:
-            self.slug = slugify(self.title)
+            self.slug = self.slugify(self.title)
         super(Question, self).save(*args, **kwargs)
         tag_objects = []
         for tag in tags:
@@ -97,8 +122,9 @@ class Answer(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User)
     question = models.ForeignKey(Question)
-    tags = models.ManyToManyField(Tag, related_name='answer_tags')
     votes = models.ManyToManyField(User, through='AnswerVote', related_name='answer_votes')
+
+    objects = AnswerManager()
 
 
 class Vote(models.Model):

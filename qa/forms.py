@@ -5,8 +5,9 @@ from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
-from qa.models import User, Question
+from qa.models import User, Question, Answer
 from qa.widgets import ClearableImageInput
 
 
@@ -45,3 +46,15 @@ class QuestionAskForm(forms.ModelForm):
                 raise ValidationError('Tag value may contain only English letters, numbers and @/./+/-/_ characters.')
 
         return tags
+
+
+class AnswerForm(forms.ModelForm):
+    class Meta:
+        model = Answer
+        fields = ('text', )
+        labels = {
+            'text': _('Your answer'),
+        }
+        widgets = {
+          'text': forms.Textarea(attrs={'rows': 5}),
+        }

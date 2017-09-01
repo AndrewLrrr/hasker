@@ -71,7 +71,9 @@
                 {% block content %}{% endblock content %}
             </div>
             <div class="col-sm-5 col-md-4">
-                <a href="{% url 'qa:ask' %}" class="btn btn-primary btn-ask">Ask!</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'qa:ask' %}" class="btn btn-primary btn-ask">Ask!</a>
+                {% endif %}
                 <div class="mobile-separator"></div>
                 <div class="trends">
                     <h2 class="text-center">Trending</h2>
