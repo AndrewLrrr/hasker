@@ -5,9 +5,9 @@
     <div class="row content-block">
         <div class="col-xs-3 col-sm-2 col-lg-1">
             <div class="rating-control">
-                <a href="#" class="vote-up glyphicon glyphicon-thumbs-up"></a>
+                <a href="{{ question.get_like_url }}" class="vote-up vote glyphicon glyphicon-thumbs-up"></a>
                 <p class="rating">{{ question.rating }}</p>
-                <a href="#" class="vote-down glyphicon glyphicon-thumbs-down"></a>
+                <a href="{{ question.get_dislike_url }}" class="vote-down vote glyphicon glyphicon-thumbs-down"></a>
             </div>
         </div>
         <div class="col-xs-9 col-sm-10 col-lg-11">
@@ -33,9 +33,9 @@
         <div class="row content-block">
             <div class="col-xs-3 col-sm-2 col-lg-1">
                 <div class="rating-control answer">
-                    <a href="#" class="vote-up glyphicon glyphicon-thumbs-up"></a>
+                    <a href="{{ answer.get_like_url }}" class="vote-up vote glyphicon glyphicon-thumbs-up"></a>
                     <p class="rating">{{ answer.rating }}</p>
-                    <a href="#" class="vote-down glyphicon glyphicon-thumbs-down"></a>
+                    <a href="{{ answer.get_dislike_url }}" class="vote-down vote glyphicon glyphicon-thumbs-down"></a>
                     <a href="#" class="is_answer glyphicon glyphicon-ok"></a>
                 </div>
             </div>

@@ -5,15 +5,16 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.http import require_POST
 
 from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
-from qa.models import Question
+from qa.models import Question, QuestionVote, Answer, AnswerVote
 
 
 class IndexView(View):
@@ -150,3 +151,57 @@ class SettingsView(View):
             messages.info(request, 'The changes have been saved!')
             return redirect('qa:settings')
         return render(request, self.template, {'form': form, 'user': user})
+
+
+def question_vote(request, pk, value=False):
+    question = get_object_or_404(Question, pk=pk)
+    try:
+        vote = QuestionVote.objects.get(question=question, user=request.user)
+        if vote.vote != value:
+            vote.delete()
+        else:
+            return JsonResponse({'success': False, 'rating': question.rating})
+    except ObjectDoesNotExist:
+        QuestionVote.objects.get_or_create(question=question, user=request.user, vote=value)
+    question.rating += 1 if value else -1
+    question.save()
+    return JsonResponse({'success': True, 'rating': question.rating})
+
+
+def answer_vote(request, pk, value=False):
+    answer = get_object_or_404(Answer, pk=pk)
+    try:
+        vote = AnswerVote.objects.get(answer=answer, user=request.user)
+        if vote.vote != value:
+            vote.delete()
+        else:
+            return JsonResponse({'success': False, 'rating': answer.rating})
+    except ObjectDoesNotExist:
+        AnswerVote.objects.get_or_create(answer=answer, user=request.user, vote=value)
+    answer.rating += 1 if value else -1
+    answer.save()
+    return JsonResponse({'success': True, 'rating': answer.rating})
+
+
+@require_POST
+@login_required
+def question_like_json(request, pk):
+    return question_vote(request, pk, True)
+
+
+@require_POST
+@login_required
+def question_dislike_json(request, pk):
+    return question_vote(request, pk, False)
+
+
+@require_POST
+@login_required
+def answer_like_json(request, pk):
+    return answer_vote(request, pk, True)
+
+
+@require_POST
+@login_required
+def answer_dislike_json(request, pk):
+    return answer_vote(request, pk, False)

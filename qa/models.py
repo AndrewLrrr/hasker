@@ -38,6 +38,14 @@ class AnswerManager(models.Manager):
         return self.all().order_by('-rating', '-pub_date')
 
 
+class VoteManager(models.Manager):
+    def new(self):
+        return self.all().order_by('-pub_date')
+
+    def popular(self):
+        return self.all().order_by('-rating')
+
+
 class User(AbstractUser):
     username = models.CharField(
         _('Login'),
@@ -93,6 +101,12 @@ class Question(models.Model):
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})
 
+    def get_like_url(self):
+        return reverse('qa:question_like', kwargs={'pk': self.pk})
+
+    def get_dislike_url(self):
+        return reverse('qa:question_dislike', kwargs={'pk': self.pk})
+
     def slugify(self, string):
         max_length = self._meta.get_field('slug').max_length
         slug = orig = slugify(string)[:max_length]
@@ -125,6 +139,12 @@ class Answer(models.Model):
     votes = models.ManyToManyField(User, through='AnswerVote', related_name='answer_votes')
 
     objects = AnswerManager()
+
+    def get_like_url(self):
+        return reverse('qa:answer_like', kwargs={'pk': self.pk})
+
+    def get_dislike_url(self):
+        return reverse('qa:answer_dislike', kwargs={'pk': self.pk})
 
 
 class Vote(models.Model):
