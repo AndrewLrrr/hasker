@@ -5,16 +5,14 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.http import require_POST
 
 from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
-from qa.models import Question, QuestionVotes, Answer, AnswerVotes
+from qa.models import Question, Answer
 
 
 class IndexView(View):
@@ -153,55 +151,24 @@ class SettingsView(View):
         return render(request, self.template, {'form': form, 'user': user})
 
 
-def question_vote(request, pk, value=False):
-    question = get_object_or_404(Question, pk=pk)
-    try:
-        vote = QuestionVotes.objects.get(question=question, user=request.user)
-        if vote.vote != value:
-            vote.delete()
-        else:
-            return JsonResponse({'success': False, 'rating': question.rating})
-    except ObjectDoesNotExist:
-        QuestionVotes.objects.get_or_create(question=question, user=request.user, vote=value)
-    question.rating += 1 if value else -1
-    question.save()
-    return JsonResponse({'success': True, 'rating': question.rating})
+class VoteView(View):
+    @method_decorator(login_required)
+    def post(self, request, pk):
+        value = True if request.POST.get('value') == 'true' else False
+        entity = get_object_or_404(self.get_model(), pk=pk)
+        entity.vote(request.user, value)
+        return JsonResponse({'rating': entity.rating})
+
+    def get_model(self):
+        raise NotImplementedError('Model needs to be defined by sub-class')
 
 
-def answer_vote(request, pk, value=False):
-    answer = get_object_or_404(Answer, pk=pk)
-    try:
-        vote = AnswerVotes.objects.get(answer=answer, user=request.user)
-        if vote.vote != value:
-            vote.delete()
-        else:
-            return JsonResponse({'success': False, 'rating': answer.rating})
-    except ObjectDoesNotExist:
-        AnswerVotes.objects.get_or_create(answer=answer, user=request.user, vote=value)
-    answer.rating += 1 if value else -1
-    answer.save()
-    return JsonResponse({'success': True, 'rating': answer.rating})
+class QuestionVoteView(VoteView):
+    def get_model(self):
+        return Question
 
 
-@require_POST
-@login_required
-def question_like_json(request, pk):
-    return question_vote(request, pk, True)
+class AnswerVoteView(VoteView):
+    def get_model(self):
+        return Answer
 
-
-@require_POST
-@login_required
-def question_dislike_json(request, pk):
-    return question_vote(request, pk, False)
-
-
-@require_POST
-@login_required
-def answer_like_json(request, pk):
-    return answer_vote(request, pk, True)
-
-
-@require_POST
-@login_required
-def answer_dislike_json(request, pk):
-    return answer_vote(request, pk, False)

@@ -4,7 +4,6 @@ function getCookie(name) {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
             var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
@@ -19,6 +18,7 @@ $('.vote').click(function (e) {
     var url = $(this).attr('href');
     var $rating = $(this).parent().find('.rating');
     $.post(url, {
+        'value': $(this).hasClass('vote-up'),
         'csrfmiddlewaretoken': getCookie('csrftoken')
     }, function (response) {
         $rating.text(response['rating']);

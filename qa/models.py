@@ -8,6 +8,7 @@ import itertools
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
@@ -25,12 +26,29 @@ def unique_filename(instance, filename):
     return os.path.join('uploads', filename)
 
 
+class VoteMixin(object):
+    def vote(self, user, value=False):
+        try:
+            vote = self.get_vote(user)
+            if vote.vote != value:
+                vote.delete()
+            else:
+                return
+        except ObjectDoesNotExist:
+            self.create_vote(user, value)
+        self.rating += 1 if value else -1
+        self.save()
+
+
 class QuestionManager(models.Manager):
     def new(self):
         return self.all().order_by('-pub_date')
 
     def popular(self):
         return self.all().order_by('-rating')
+
+    def trend(self):
+        return self.all().order_by('-rating', '-pub_date')
 
 
 class AnswerManager(models.Manager):
@@ -86,11 +104,12 @@ class Tag(models.Model):
 
 
 @python_2_unicode_compatible
-class Question(models.Model):
+class Question(VoteMixin, models.Model):
     title = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(unique=True)
     text = models.TextField()
     rating = models.IntegerField(default=0)
+    has_answer = models.BooleanField(default=False)
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag, related_name='question_tags')
@@ -101,11 +120,14 @@ class Question(models.Model):
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})
 
-    def get_like_url(self):
-        return reverse('qa:question_like', kwargs={'pk': self.pk})
+    def get_vote_url(self):
+        return reverse('qa:question_vote', kwargs={'pk': self.pk})
 
-    def get_dislike_url(self):
-        return reverse('qa:question_dislike', kwargs={'pk': self.pk})
+    def get_vote(self, user):
+        return QuestionVotes.objects.get(question=self, user=user)
+
+    def create_vote(self, user, value):
+        return QuestionVotes.objects.get_or_create(question=self, user=user, vote=value)
 
     def slugify(self, string):
         max_length = self._meta.get_field('slug').max_length
@@ -130,9 +152,10 @@ class Question(models.Model):
         return self.title
 
 
-class Answer(models.Model):
+class Answer(VoteMixin, models.Model):
     text = models.TextField()
     rating = models.IntegerField(default=0)
+    is_correct = models.BooleanField(default=False)
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User)
     question = models.ForeignKey(Question)
@@ -140,11 +163,14 @@ class Answer(models.Model):
 
     objects = AnswerManager()
 
-    def get_like_url(self):
-        return reverse('qa:answer_like', kwargs={'pk': self.pk})
+    def get_vote_url(self):
+        return reverse('qa:answer_vote', kwargs={'pk': self.pk})
 
-    def get_dislike_url(self):
-        return reverse('qa:answer_dislike', kwargs={'pk': self.pk})
+    def get_vote(self, user):
+        return AnswerVotes.objects.get(answer=self, user=user)
+
+    def create_vote(self, user, value):
+        return AnswerVotes.objects.get_or_create(answer=self, user=user, vote=value)
 
 
 class Vote(models.Model):
