@@ -94,7 +94,7 @@ class Question(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag, related_name='question_tags')
-    votes = models.ManyToManyField(User, through='QuestionVote', related_name='question_votes')
+    votes = models.ManyToManyField(User, through='QuestionVotes', related_name='question_votes')
 
     objects = QuestionManager()
 
@@ -136,7 +136,7 @@ class Answer(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User)
     question = models.ForeignKey(Question)
-    votes = models.ManyToManyField(User, through='AnswerVote', related_name='answer_votes')
+    votes = models.ManyToManyField(User, through='AnswerVotes', related_name='answer_votes')
 
     objects = AnswerManager()
 
@@ -154,21 +154,15 @@ class Vote(models.Model):
     class Meta:
         abstract = True
 
-    def is_liked(self):
-        return self.vote is True
 
-    def is_disliked(self):
-        return self.vote is False
-
-
-class AnswerVote(Vote):
+class AnswerVotes(Vote):
     answer = models.ForeignKey(Answer)
 
     class Meta:
         unique_together = (('user', 'answer'),)
 
 
-class QuestionVote(Vote):
+class QuestionVotes(Vote):
     question = models.ForeignKey(Question)
 
     class Meta:

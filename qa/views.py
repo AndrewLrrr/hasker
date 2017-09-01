@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 
 from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
-from qa.models import Question, QuestionVote, Answer, AnswerVote
+from qa.models import Question, QuestionVotes, Answer, AnswerVotes
 
 
 class IndexView(View):
@@ -156,13 +156,13 @@ class SettingsView(View):
 def question_vote(request, pk, value=False):
     question = get_object_or_404(Question, pk=pk)
     try:
-        vote = QuestionVote.objects.get(question=question, user=request.user)
+        vote = QuestionVotes.objects.get(question=question, user=request.user)
         if vote.vote != value:
             vote.delete()
         else:
             return JsonResponse({'success': False, 'rating': question.rating})
     except ObjectDoesNotExist:
-        QuestionVote.objects.get_or_create(question=question, user=request.user, vote=value)
+        QuestionVotes.objects.get_or_create(question=question, user=request.user, vote=value)
     question.rating += 1 if value else -1
     question.save()
     return JsonResponse({'success': True, 'rating': question.rating})
@@ -171,13 +171,13 @@ def question_vote(request, pk, value=False):
 def answer_vote(request, pk, value=False):
     answer = get_object_or_404(Answer, pk=pk)
     try:
-        vote = AnswerVote.objects.get(answer=answer, user=request.user)
+        vote = AnswerVotes.objects.get(answer=answer, user=request.user)
         if vote.vote != value:
             vote.delete()
         else:
             return JsonResponse({'success': False, 'rating': answer.rating})
     except ObjectDoesNotExist:
-        AnswerVote.objects.get_or_create(answer=answer, user=request.user, vote=value)
+        AnswerVotes.objects.get_or_create(answer=answer, user=request.user, vote=value)
     answer.rating += 1 if value else -1
     answer.save()
     return JsonResponse({'success': True, 'rating': answer.rating})
