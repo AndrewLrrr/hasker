@@ -29,31 +29,36 @@
             </div>
         </div>
     </div>
-    {% for answer in question.answer_set.popular %}
-        <div class="row content-block">
-            <div class="col-xs-3 col-sm-2 col-lg-1">
-                <div class="rating-control answer">
-                    <a href="{{ answer.get_vote_url }}" class="vote-up vote glyphicon glyphicon-thumbs-up"></a>
-                    <p class="rating">{{ answer.rating }}</p>
-                    <a href="{{ answer.get_vote_url }}" class="vote-down vote glyphicon glyphicon-thumbs-down"></a>
-                    {% if question.author == user %}
-                        <a href="#" class="is_answer glyphicon glyphicon-ok"></a>
-                    {% endif %}
+    <div class="answers">
+        {% for answer in question.answer_set.popular %}
+            <div class="row content-block">
+                <div class="col-xs-3 col-sm-2 col-lg-1">
+                    <div class="rating-control answer">
+                        <a href="{{ answer.get_vote_url }}" class="vote-up vote glyphicon glyphicon-thumbs-up"></a>
+                        <p class="rating">{{ answer.rating }}</p>
+                        <a href="{{ answer.get_vote_url }}" class="vote-down vote glyphicon glyphicon-thumbs-down"></a>
+                        {% if question.author == user %}
+                            <a href="{{ answer.get_mark_url }}"
+                               class="mark {% if question.has_answer and answer.is_correct %} active {% endif %} glyphicon glyphicon-ok"></a>
+                        {% elif question.has_answer and answer.is_correct %}
+                            <span class="mark glyphicon glyphicon-ok"></span>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            <div class="col-xs-9 col-sm-10 col-lg-11">
-                <p>{{ answer.text }}</p>
-                <div class="additional">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <img src="{{ answer.author.get_avatar_url }}" alt=""/>
+                <div class="col-xs-9 col-sm-10 col-lg-11">
+                    <p>{{ answer.text }}</p>
+                    <div class="additional">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <img src="{{ answer.author.get_avatar_url }}" alt=""/>
+                            </div>
+                            <p class="text-center">{{ answer.author.username }}</p>
                         </div>
-                        <p class="text-center">{{ answer.author.username }}</p>
                     </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
     {% if user.is_authenticated %}
         <div class="answer-form">
             {% if form.errors %}

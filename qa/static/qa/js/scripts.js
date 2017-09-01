@@ -13,7 +13,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-$('.vote').click(function (e) {
+$('a.vote').click(function (e) {
     e.preventDefault();
     var url = $(this).attr('href');
     var $rating = $(this).parent().find('.rating');
@@ -22,5 +22,25 @@ $('.vote').click(function (e) {
         'csrfmiddlewaretoken': getCookie('csrftoken')
     }, function (response) {
         $rating.text(response['rating']);
+    });
+});
+
+
+$('a.mark').click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var url = $this.attr('href');
+    $.post(url, {
+        'csrfmiddlewaretoken': getCookie('csrftoken')
+    }, function (response) {
+        if (response['success']) {
+            var needActivate = !$this.hasClass('active');
+            $('.answers').find('.mark').each(function () {
+                $(this).removeClass('active');
+            });
+            if (needActivate) {
+                $this.addClass('active');
+            }
+        }
     });
 });

@@ -33,11 +33,12 @@ class VoteMixin(object):
             if vote.vote != value:
                 vote.delete()
             else:
-                return
+                return False
         except ObjectDoesNotExist:
             self.create_vote(user, value)
         self.rating += 1 if value else -1
         self.save()
+        return True
 
 
 class QuestionManager(models.Manager):
@@ -163,8 +164,30 @@ class Answer(VoteMixin, models.Model):
 
     objects = AnswerManager()
 
+    def mark(self, user):
+        question = self.question
+        if question.author != user:
+            return False
+        if self.is_correct:
+            self.is_correct = False
+            question.has_answer = False
+        else:
+            if question.has_answer:
+                incorrect_answer = question.answer_set.get(is_correct=True)
+                incorrect_answer.is_correct = False
+                incorrect_answer.save()
+            else:
+                question.has_answer = True
+            self.is_correct = True
+        question.save()
+        self.save()
+        return True
+
     def get_vote_url(self):
         return reverse('qa:answer_vote', kwargs={'pk': self.pk})
+
+    def get_mark_url(self):
+        return reverse('qa:answer_mark', kwargs={'pk': self.pk})
 
     def get_vote(self, user):
         return AnswerVotes.objects.get(answer=self, user=user)

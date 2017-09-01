@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^question/(?P<slug>[^\s]+)/?$', QuestionView.as_view(), name='question'),
     url(r'^vote/question/(?P<pk>[\d]+)/?$', QuestionVoteView.as_view(), name='question_vote'),
     url(r'^vote/answer/(?P<pk>[\d]+)/?$', AnswerVoteView.as_view(), name='answer_vote'),
+    url(r'^mark/answer/(?P<pk>[\d]+)/?$', AnswerMarkView.as_view(), name='answer_mark'),
     url(r'^tag/(?P<slug>[^\s]+)/?$', TagView.as_view(), name='tag'),
     url(r'^search/?', SearchView.as_view(), name='search'),
     url(r'^singup/$', SingUpView.as_view(), name='singup'),

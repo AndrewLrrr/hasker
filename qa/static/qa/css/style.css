@@ -214,13 +214,21 @@ p.profile-login {
     text-decoration: none;
 }
 
-.rating-control a.is_answer {
+.rating-control .mark {
+    background: none;
     margin-bottom: 20px;
+}
+
+.rating-control a.mark {
     color: #eee;
 }
 
-.rating-control a.is_answer:hover,
-.rating-control a.is_answer:focus {
+.rating-control span.mark {
+    color: #f0ad4e;
+}
+
+.rating-control a.mark.active,
+.rating-control a.mark:hover {
     color: #f0ad4e;
 }
 

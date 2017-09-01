@@ -79,6 +79,35 @@ class AskView(View):
         return render(request, self.template, {'form': form})
 
 
+class AnswerMarkView(View):
+    @method_decorator(login_required)
+    def post(self, request, pk):
+        answer = get_object_or_404(Answer, pk=pk)
+        return JsonResponse({'success': answer.mark(request.user)})
+
+
+class VoteView(View):
+    @method_decorator(login_required)
+    def post(self, request, pk):
+        value = True if request.POST.get('value') == 'true' else False
+        entity = get_object_or_404(self.get_model(), pk=pk)
+        entity.vote(request.user, value)
+        return JsonResponse({'rating': entity.rating})
+
+    def get_model(self):
+        raise NotImplementedError('Model needs to be defined by sub-class')
+
+
+class QuestionVoteView(VoteView):
+    def get_model(self):
+        return Question
+
+
+class AnswerVoteView(VoteView):
+    def get_model(self):
+        return Answer
+
+
 class SingUpView(View):
     form_class = UserSingUpForm
     template = 'qa/user_singup.html'
@@ -149,26 +178,3 @@ class SettingsView(View):
             messages.info(request, 'The changes have been saved!')
             return redirect('qa:settings')
         return render(request, self.template, {'form': form, 'user': user})
-
-
-class VoteView(View):
-    @method_decorator(login_required)
-    def post(self, request, pk):
-        value = True if request.POST.get('value') == 'true' else False
-        entity = get_object_or_404(self.get_model(), pk=pk)
-        entity.vote(request.user, value)
-        return JsonResponse({'rating': entity.rating})
-
-    def get_model(self):
-        raise NotImplementedError('Model needs to be defined by sub-class')
-
-
-class QuestionVoteView(VoteView):
-    def get_model(self):
-        return Question
-
-
-class AnswerVoteView(VoteView):
-    def get_model(self):
-        return Answer
-
