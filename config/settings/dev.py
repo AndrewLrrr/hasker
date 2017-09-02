@@ -31,3 +31,5 @@ if DEBUG:
             'debug_toolbar.middleware.DebugToolbarMiddleware'
         )
 
+
+ITEMS_PER_PAGE = 5

@@ -99,8 +99,11 @@
 .question-content-block {
     text-align: center;
     border-bottom: 1px solid #ccc;
-    padding-bottom: 10px;
     margin-bottom: 10px;
+}
+
+.question-content-block:last-child {
+    border-bottom: none;
 }
 
 .question-content-block .question-title {

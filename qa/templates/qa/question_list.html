@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Questions{% endblock title %}
+{% block title %}{% if request.GET.sort %}Hot questions{% else %}New questions{% endif %}{% endblock title %}
 {% block content %}
     <h1 class="question-header odd-header pull-left">
         {% if not request.GET.sort %}
@@ -10,35 +10,38 @@
     </h1>
     <h1 class="question-header even-header">
         {% if request.GET.sort %}
-            Popular questions
+            Hot questions
         {% else %}
-            <a href="{% url 'qa:index' %}?sort=popular">Popular questions</a>
+            <a href="{% url 'qa:index' %}?sort=popular">Hot questions</a>
         {% endif %}
     </h1>
-    {% for question in questions %}
-        <div class="row question-content-block">
-            <div class="col-xs-2">
-                <div>{{ question.rating }}</div>
-                <div>Votes</div>
+    <div class="question-list">
+        {% for question in questions %}
+            <div class="row question-content-block">
+                <div class="col-xs-2">
+                    <div>{{ question.rating }}</div>
+                    <div>Votes</div>
+                </div>
+                <div class="col-xs-2">
+                    <div>{{ question.answer_set.count }}</div>
+                    <div>Answers</div>
+                </div>
+                <div class="col-xs-5">
+                    <div class="question-title"><a href="{{ question.get_url }}">{{ question.title }}</a></div>
+                    {% if question.tags.exists %}
+                        <div class="tag-list">
+                            {% for tag in question.tags.all %}
+                                <a class="label label-primary" href="#">{{ tag }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-xs-3">
+                    <div><a href="{{ question.author.get_url }}">{{ question.author.username }}</a></div>
+                    <div>asked {{ question.get_human_date }}</div>
+                </div>
             </div>
-            <div class="col-xs-2">
-                <div>{{ question.answer_set.count }}</div>
-                <div>Answers</div>
-            </div>
-            <div class="col-xs-5">
-                <div class="question-title"><a href="{{ question.get_url }}">{{ question.title }}</a></div>
-                {% if question.tags.exists %}
-                    <div class="tag-list">
-                        {% for tag in question.tags.all %}
-                            <a class="label label-primary" href="#">{{ tag }}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="col-xs-3">
-                <div><a href="{{ question.author.get_url }}">{{ question.author.username }}</a></div>
-                <div>asked {{ question.get_human_date }}</div>
-            </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
+    {% include 'qa/pagination.html' %}
 {% endblock content %}

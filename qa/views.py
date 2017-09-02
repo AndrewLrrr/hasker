@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import urllib
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse, JsonResponse
+from django.core.paginator import Paginator, EmptyPage
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 
@@ -15,15 +20,49 @@ from qa.decorators import logout_required
 from qa.models import Question, Answer, User
 
 
-class IndexView(View):
+class PaginationMixin(object):
+    def paginate(self, request):
+        try:
+            limit = int(request.GET.get('limit', settings.ITEMS_PER_PAGE))
+        except ValueError:
+            limit = settings.ITEMS_PER_PAGE
+        if limit > settings.PAGINATION_LIMIT:
+            limit = settings.ITEMS_PER_PAGE
+        try:
+            page = int(request.GET.get('page', 1))
+        except ValueError:
+            raise Http404
+        paginator = Paginator(self.get_query_set(), limit)
+        get_params = request.GET.copy()
+        if 'page' in get_params:
+            del get_params['page']
+        if len(get_params) > 0:
+            paginator.url = '{}?{}&page='.format(self.get_url(), urllib.urlencode(get_params.items()))
+        else:
+            paginator.url = '{}?page='.format(self.get_url())
+        try:
+            page = paginator.page(page)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+        return paginator, page
+
+
+class IndexView(PaginationMixin, View):
     template = 'qa/question_list.html'
 
     def get(self, request):
-        if self.request.GET.get('sort'):
-            questions = Question.objects.popular()
-        else:
-            questions = Question.objects.new()
-        return render(request, self.template, {'questions': questions})
+        paginator, page = self.paginate(request)
+        return render(request, self.template, {
+            'questions': page.object_list,
+            'paginator': paginator,
+            'page': page,
+        })
+
+    def get_query_set(self):
+        return Question.objects.popular() if self.request.GET.get('sort') else Question.objects.new()
+
+    def get_url(self):
+        return reverse('qa:index')
 
 
 class PopularView(View):
