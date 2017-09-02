@@ -260,6 +260,20 @@ h1.question-header {
     margin-bottom: 20px;
 }
 
+h1.question-header a {
+    color: #aaa;
+}
+
+h1.question-header a:hover {
+    color: #888;
+}
+
+h1.odd-header {
+    padding-right: 20px;
+    margin-right: 20px;
+    border-right: 2px solid #aaa;
+}
+
 .tag-list {
     float: left;
 }

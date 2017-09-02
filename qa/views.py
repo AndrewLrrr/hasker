@@ -19,7 +19,10 @@ class IndexView(View):
     template = 'qa/question_list.html'
 
     def get(self, request):
-        questions = Question.objects.new()
+        if self.request.GET.get('sort'):
+            questions = Question.objects.popular()
+        else:
+            questions = Question.objects.new()
         return render(request, self.template, {'questions': questions})
 
 

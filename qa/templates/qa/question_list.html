@@ -1,7 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Questions{% endblock title %}
 {% block content %}
-    <h1 class="question-header">New questions</h1>
+    <h1 class="question-header odd-header pull-left">
+        {% if not request.GET.sort %}
+            New questions
+        {% else %}
+            <a href="{% url 'qa:index' %}">New questions</a>
+        {% endif %}
+    </h1>
+    <h1 class="question-header even-header">
+        {% if request.GET.sort %}
+            Popular questions
+        {% else %}
+            <a href="{% url 'qa:index' %}?sort=popular">Popular questions</a>
+        {% endif %}
+    </h1>
     {% for question in questions %}
         <div class="row question-content-block">
             <div class="col-xs-2">
