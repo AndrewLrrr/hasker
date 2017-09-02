@@ -12,13 +12,15 @@ from django.views import View
 
 from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
-from qa.models import Question, Answer
+from qa.models import Question, Answer, User
 
 
 class IndexView(View):
+    template = 'qa/question_list.html'
+
     def get(self, request):
-        message = 'Hello ' + request.user.username + '!' if request.user.is_authenticated() else 'Nobody'
-        return HttpResponse(message)
+        questions = Question.objects.new()
+        return render(request, self.template, {'questions': questions})
 
 
 class PopularView(View):
@@ -178,3 +180,11 @@ class SettingsView(View):
             messages.info(request, 'The changes have been saved!')
             return redirect('qa:settings')
         return render(request, self.template, {'form': form, 'user': user})
+
+
+class ProfileView(View):
+    template = 'qa/user_profile.html'
+
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        return render(request, self.template, {'user': user})

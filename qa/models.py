@@ -5,14 +5,18 @@ import os
 import uuid
 
 import itertools
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.text import slugify
+from django.utils.timesince import timesince
 from django.utils.translation import ugettext_lazy as _
 
 from qa.fields import ContentTypeRestrictedFileField
@@ -92,6 +96,9 @@ class User(AbstractUser):
         null=True
     )
 
+    def get_url(self):
+        return reverse('qa:profile', kwargs={'username': self.username})
+
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
 
@@ -117,6 +124,13 @@ class Question(VoteMixin, models.Model):
     votes = models.ManyToManyField(User, through='QuestionVotes', related_name='question_votes')
 
     objects = QuestionManager()
+
+    def get_human_date(self):
+        now = timezone.now()
+        difference = now - self.pub_date
+        if difference <= timedelta(minutes=10):
+            return 'just now'
+        return '%(time)s ago' % {'time': timesince(self.pub_date).split(', ')[0]}
 
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})
