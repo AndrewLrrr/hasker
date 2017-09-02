@@ -34,7 +34,7 @@
         </div>
     </div>
     <div class="answer-list">
-        {% for answer in question.answer_set.popular %}
+        {% for answer in answers %}
             <div class="row content-block">
                 <div class="col-xs-3 col-sm-2 col-lg-1">
                     <div class="rating-control answer">
@@ -67,6 +67,7 @@
             </div>
         {% endfor %}
     </div>
+    {% include 'qa/pagination.html' %}
     {% if user.is_authenticated %}
         <div class="answer-form">
             {% if form.errors %}

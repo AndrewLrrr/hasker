@@ -21,13 +21,13 @@ from qa.models import Question, Answer, User
 
 
 class PaginationMixin(object):
-    def paginate(self, request):
+    def paginate(self, request, items_per_page=20, pagination_limit=100):
         try:
-            limit = int(request.GET.get('limit', settings.ITEMS_PER_PAGE))
+            limit = int(request.GET.get('limit', items_per_page))
         except ValueError:
-            limit = settings.ITEMS_PER_PAGE
-        if limit > settings.PAGINATION_LIMIT:
-            limit = settings.ITEMS_PER_PAGE
+            limit = items_per_page
+        if limit > pagination_limit:
+            limit = items_per_page
         try:
             page = int(request.GET.get('page', 1))
         except ValueError:
@@ -51,7 +51,7 @@ class IndexView(PaginationMixin, View):
     template = 'qa/question_list.html'
 
     def get(self, request):
-        paginator, page = self.paginate(request)
+        paginator, page = self.paginate(request, settings.QUESTIONS_PER_PAGE)
         return render(request, self.template, {
             'questions': page.object_list,
             'paginator': paginator,
@@ -65,11 +65,6 @@ class IndexView(PaginationMixin, View):
         return reverse('qa:index')
 
 
-class PopularView(View):
-    def get(self, request):
-        return HttpResponse('popular')
-
-
 class TagView(View):
     def get(self, request, slug):
         return HttpResponse('tag')
@@ -80,26 +75,44 @@ class SearchView(View):
         return HttpResponse('search')
 
 
-class QuestionView(View):
+class QuestionView(PaginationMixin, View):
     form_class = AnswerForm
     template = 'qa/question_detail.html'
+    question = None
+    form = None
+
+    def do_response(self, request):
+        paginator, page = self.paginate(request, settings.ANSWERS_PER_PAGE)
+        return render(request, self.template, {
+            'question': self.question,
+            'form': self.form,
+            'answers': page.object_list,
+            'paginator': paginator,
+            'page': page,
+        })
 
     def get(self, request, slug):
-        form = self.form_class(None)
-        question = get_object_or_404(Question, slug=slug)
-        return render(request, self.template, {'question': question, 'form': form})
+        self.form = self.form_class(None)
+        self.question = get_object_or_404(Question, slug=slug)
+        return self.do_response(request)
 
     @method_decorator(login_required)
     def post(self, request, slug):
-        form = self.form_class(request.POST)
-        question = get_object_or_404(Question, slug=slug)
-        if form.is_valid():
-            answer = form.save(commit=False)
-            answer.question = question
+        self.form = self.form_class(request.POST)
+        self.question = get_object_or_404(Question, slug=slug)
+        if self.form.is_valid():
+            answer = self.form.save(commit=False)
+            answer.question = self.question
             answer.author = request.user
             answer.save()
-            return redirect(question.get_url())
-        return render(request, self.template, {'question': question, 'form': form})
+            return redirect(self.question.get_url())
+        return self.do_response(request)
+
+    def get_query_set(self):
+        return self.question.answer_set.popular()
+
+    def get_url(self):
+        return self.question.get_url()
 
 
 class AskView(View):
