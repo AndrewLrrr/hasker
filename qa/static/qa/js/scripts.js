@@ -40,11 +40,9 @@ $('a.mark').click(function (e) {
             });
             if (needActivate) {
                 $this.addClass('active');
+            } else {
+                $this.removeClass('active');
             }
         }
     });
 });
-
-// $('form.search-form').submit(function (e) {
-//     e.preventDefault();
-// });
