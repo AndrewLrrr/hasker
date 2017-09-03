@@ -28,9 +28,15 @@
                 </div>
                 <div class="collapse navbar-collapse" id="navbar-collapse">
                     <div class="pull-right navbar-utils-wrapper">
-                        <form class="navbar-form navbar-left">
+                        <form class="search-form navbar-form navbar-left" method="get" action="{% url 'qa:search' %}">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Search" id="searchForm">
+                                <input name="q"
+                                       type="text"
+                                       class="form-control"
+                                       placeholder="Search"
+                                       id="searchForm"
+                                       value="{{ request.GET.q }}"
+                                />
                                 <label class="input-group-addon" for="searchForm">
                                     <span class="glyphicon glyphicon-search"></span>
                                 </label>

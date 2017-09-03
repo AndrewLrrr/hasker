@@ -50,23 +50,12 @@ class QuestionManager(models.Manager):
         return self.all().order_by('-pub_date')
 
     def popular(self):
-        return self.all().order_by('-rating')
-
-    def trend(self):
         return self.all().order_by('-rating', '-pub_date')
 
 
 class AnswerManager(models.Manager):
     def popular(self):
         return self.all().order_by('-rating', '-pub_date')
-
-
-class VoteManager(models.Manager):
-    def new(self):
-        return self.all().order_by('-pub_date')
-
-    def popular(self):
-        return self.all().order_by('-rating')
 
 
 class User(AbstractUser):
@@ -77,14 +66,14 @@ class User(AbstractUser):
         help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
         validators=[AbstractUser.username_validator],
         error_messages={
-            'unique': _("A user with that login already exists."),
+            'unique': _('A user with that login already exists.'),
         },
     )
     email = models.EmailField(
         _('Email'),
         unique=True,
         error_messages={
-            'unique': _("A user with that email already exists."),
+            'unique': _('A user with that email already exists.'),
         },
     )
     avatar = ContentTypeRestrictedFileField(
@@ -107,6 +96,9 @@ class User(AbstractUser):
 class Tag(models.Model):
     name = models.CharField(_('Name'), max_length=50, unique=True)
 
+    def get_url(self):
+        return '{}?q=tag:{}'.format(reverse('qa:search'), self.name)
+
     def __str__(self):
         return self.name
 
@@ -124,13 +116,6 @@ class Question(VoteMixin, models.Model):
     votes = models.ManyToManyField(User, through='QuestionVotes', related_name='question_votes')
 
     objects = QuestionManager()
-
-    def get_human_date(self):
-        now = timezone.now()
-        difference = now - self.pub_date
-        if difference <= timedelta(minutes=10):
-            return 'just now'
-        return '%(time)s ago' % {'time': timesince(self.pub_date).split(', ')[0]}
 
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})

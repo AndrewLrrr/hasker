@@ -16,7 +16,7 @@
                 {% if question.tags.exists %}
                     <div class="tag-list">
                         {% for tag in question.tags.all %}
-                            <a class="label label-primary" href="#">{{ tag }}</a>
+                            <a href="{{ tag.get_url }}" class="label label-primary">{{ tag }}</a>
                         {% endfor %}
                     </div>
                 {% endif %}
@@ -67,7 +67,7 @@
             </div>
         {% endfor %}
     </div>
-    {% include 'qa/pagination.html' %}
+    {% include 'qa/snippets/pagination.html' %}
     {% if user.is_authenticated %}
         <div class="answer-form">
             {% if form.errors %}
@@ -79,7 +79,7 @@
             {% endif %}
             <form class="form-base" method="post" action="{{ question.get_url }}">
                 <input type="hidden" name="question_id" value="{{ question.pk }}">
-                {% include 'qa/form_template.html' %}
+                {% include 'qa/snippets/form.html' %}
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Send</button>
                 </div>

@@ -9,6 +9,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -17,7 +18,7 @@ from django.views import View
 
 from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
-from qa.models import Question, Answer, User
+from qa.models import Question, Answer, User, Tag
 
 
 class PaginationMixin(object):
@@ -65,14 +66,38 @@ class IndexView(PaginationMixin, View):
         return reverse('qa:index')
 
 
+class SearchView(PaginationMixin, View):
+    template = 'qa/question_search.html'
+    search_query = None
+
+    def get(self, request):
+        self.search_query = request.GET.get('q')[:255]
+        paginator, page = self.paginate(request, settings.QUESTIONS_PER_PAGE)
+        return render(request, self.template, {
+            'questions': page.object_list,
+            'paginator': paginator,
+            'page': page,
+        })
+
+    def get_query_set(self):
+        if not self.search_query:
+            return Question.objects.none()
+        if self.search_query.startswith('tag:'):
+            try:
+                tag = get_object_or_404(Tag, name=self.search_query[len('tag:'):])
+            except Http404:
+                return Question.objects.none()
+            return tag.question_tags.popular()
+        query = Q(title__icontains=self.search_query) | Q(text__icontains=self.search_query)
+        return Question.objects.filter(query).order_by('-rating', '-pub_date')
+
+    def get_url(self):
+        return reverse('qa:search')
+
+
 class TagView(View):
     def get(self, request, slug):
         return HttpResponse('tag')
-
-
-class SearchView(View):
-    def get(self, request):
-        return HttpResponse('search')
 
 
 class QuestionView(PaginationMixin, View):
