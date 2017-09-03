@@ -5,7 +5,7 @@ import os
 import uuid
 
 import itertools
-from datetime import timedelta
+from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -13,10 +13,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.text import slugify
-from django.utils.timesince import timesince
 from django.utils.translation import ugettext_lazy as _
 
 from qa.fields import ContentTypeRestrictedFileField
@@ -97,7 +95,7 @@ class Tag(models.Model):
     name = models.CharField(_('Name'), max_length=50, unique=True)
 
     def get_url(self):
-        return '{}?q=tag:{}'.format(reverse('qa:search'), self.name)
+        return '{}?{}'.format(reverse('qa:search'), urlencode({'q': 'tag:' + self.name}))
 
     def __str__(self):
         return self.name

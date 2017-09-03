@@ -1,8 +1,11 @@
 from datetime import timedelta
 
 from django import template
+from django.conf import settings
 from django.utils import timezone
 from django.utils.timesince import timesince
+
+from qa.models import Question
 
 register = template.Library()
 
@@ -21,3 +24,9 @@ def get_human_date(date):
     if difference <= timedelta(minutes=10):
         return 'just now'
     return '%(time)s ago' % {'time': timesince(date).split(', ')[0]}
+
+
+@register.inclusion_tag('qa/snippets/question_trending_list.html')
+def show_trending():
+    questions = Question.objects.popular()[:settings.TRENDING_QUESTIONS_LIMIT]
+    return {'questions': questions}

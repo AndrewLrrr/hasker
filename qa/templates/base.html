@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load qa_extras %}
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -83,23 +84,7 @@
                 <div class="mobile-separator"></div>
                 <div class="trends">
                     <h2 class="text-center">Trending</h2>
-                    <div class="trend-item">
-                        <span class="label label-primary">100</span>
-                        <a href="#" class="trent-link">How to Python</a>
-                    </div>
-                    <div class="trend-item">
-                        <span class="label label-primary">83</span>
-                        <a href="#" class="trent-link">How to PHP</a>
-                    </div>
-                    <div class="trend-item">
-                        <span class="label label-primary">80</span>
-                        <a href="#" class="trent-link">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam
-                            maximus, erat sit amet fringilla vestibulum</a>
-                    </div>
-                    <div class="trend-item">
-                        <span class="label label-primary">78</span>
-                        <a href="#" class="trent-link">How to Java</a>
-                    </div>
+                    {% show_trending %}
                 </div>
             </div>
         </div>
