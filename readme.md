@@ -1,4 +1,4 @@
-# Django web application for Otus python Developer course.
+# Django web application for Otus python developer course.
 
 ## Question-answer site, analogue of stackoverflow.com
 
