@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -19,6 +19,7 @@ from django.views import View
 from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
 from qa.decorators import logout_required
 from qa.models import Question, Answer, User, Tag
+from qa.utils import new_answer_email_notify
 
 
 class PaginationMixin(object):
@@ -95,11 +96,6 @@ class SearchView(PaginationMixin, View):
         return reverse('qa:search')
 
 
-class TagView(View):
-    def get(self, request, slug):
-        return HttpResponse('tag')
-
-
 class QuestionView(PaginationMixin, View):
     form_class = AnswerForm
     template = 'qa/question_detail.html'
@@ -130,6 +126,7 @@ class QuestionView(PaginationMixin, View):
             answer.question = self.question
             answer.author = request.user
             answer.save()
+            new_answer_email_notify(request, self.question, answer)
             return redirect(self.question.get_url())
         return self.do_response(request)
 
@@ -162,19 +159,23 @@ class AskView(View):
 
 
 class AnswerMarkView(View):
-    @method_decorator(login_required)
     def post(self, request, pk):
-        answer = get_object_or_404(Answer, pk=pk)
-        return JsonResponse({'success': answer.mark(request.user)})
+        if request.user.is_authenticated():
+            answer = get_object_or_404(Answer, pk=pk)
+            return JsonResponse({'success': answer.mark(request.user)})
+        else:
+            return HttpResponseForbidden()
 
 
 class VoteView(View):
-    @method_decorator(login_required)
     def post(self, request, pk):
-        value = True if request.POST.get('value') == 'true' else False
-        entity = get_object_or_404(self.get_model(), pk=pk)
-        entity.vote(request.user, value)
-        return JsonResponse({'rating': entity.rating})
+        if request.user.is_authenticated():
+            value = True if request.POST.get('value') == 'true' else False
+            entity = get_object_or_404(self.get_model(), pk=pk)
+            entity.vote(request.user, value)
+            return JsonResponse({'rating': entity.rating})
+        else:
+            return HttpResponseForbidden()
 
     def get_model(self):
         raise NotImplementedError('Model needs to be defined by sub-class')

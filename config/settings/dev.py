@@ -7,6 +7,10 @@ SECRET_KEY = '-ki8y=tc=$e4f_hz2+rjv_q=bdj&j37-fys$_(qz05tik)^6f='
 DEBUG = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = '1025'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'hasker@email.com'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -53,6 +57,6 @@ if DEBUG:
 
 QUESTIONS_PER_PAGE = 5
 
-ANSWERS_PER_PAGE = 2
+ANSWERS_PER_PAGE = 5
 
 TRENDING_QUESTIONS_LIMIT = 5
