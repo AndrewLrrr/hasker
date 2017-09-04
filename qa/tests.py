@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 
 from qa.models import Question, Answer, User
 from qa.views import QuestionVoteView, AnswerVoteView, AnswerMarkView
@@ -14,6 +16,45 @@ def create_question(author, title='Test question', text='Test question text'):
 
 def create_answer(question, author, text='Test answer text'):
     return Answer.objects.create(text=text, question=question, author=author)
+
+
+class IndexViewTests(TestCase):
+    questions_data = {
+        'question1': {'text': 'text1', 'rating': 3, 'days': 0},
+        'question2': {'text': 'text2', 'rating': 3, 'days': 1},
+        'question3': {'text': 'text3', 'rating': 2, 'days': 2},
+        'question4': {'text': 'text4', 'rating': 1, 'days': 3},
+    }
+
+    def setUp(self):
+        question_author = User.objects.create_user(
+            username='test1', email='test1@eamil.com', password='top_secret'
+        )
+
+        for title, data in self.questions_data.items():
+            pub_date = timezone.now() + datetime.timedelta(days=data['days'])
+            question = Question.objects.create(
+                title=title,
+                text=data['text'],
+                rating=data['rating'],
+                author=question_author,
+            )
+            question.pub_date = pub_date
+            question.save()
+
+    def test_questions_sorted_by_pub_date(self):
+        response = self.client.get(reverse('qa:index'))
+        self.assertQuerysetEqual(
+            response.context['questions'],
+            ['<Question: question4>', '<Question: question3>', '<Question: question2>', '<Question: question1>']
+        )
+
+    def test_questions_sorted_by_rating_and_pub_date(self):
+        response = self.client.get(reverse('qa:index') + '?sort=popular')
+        self.assertQuerysetEqual(
+            response.context['questions'],
+            ['<Question: question2>', '<Question: question1>', '<Question: question3>', '<Question: question4>']
+        )
 
 
 class SearchViewTests(TestCase):
@@ -30,14 +71,12 @@ class SearchViewTests(TestCase):
     }
 
     def setUp(self):
-        self.factory = RequestFactory()
-
         question_author = User.objects.create_user(
             username='test1', email='test1@eamil.com', password='top_secret'
         )
 
         for title, text in self.questions_data.items():
-            question = create_question(title=title, text=text, author=question_author)
+            question = Question.objects.create(title=title, text=text, author=question_author)
             question.save(self.tags_data[title])
 
     def test_empty_search(self):
