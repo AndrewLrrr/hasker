@@ -9,6 +9,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.paginator import Paginator, EmptyPage
+from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
@@ -118,6 +119,7 @@ class QuestionView(PaginationMixin, View):
         return self.do_response(request)
 
     @method_decorator(login_required)
+    @transaction.atomic
     def post(self, request, slug):
         self.form = self.form_class(request.POST)
         self.question = get_object_or_404(Question, slug=slug)
@@ -147,6 +149,7 @@ class AskView(View):
         return render(request, self.template, {'form': form})
 
     @method_decorator(login_required)
+    @transaction.atomic
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -159,6 +162,8 @@ class AskView(View):
 
 
 class AnswerMarkView(View):
+
+    @transaction.atomic
     def post(self, request, pk):
         if request.user.is_authenticated():
             answer = get_object_or_404(Answer, pk=pk)
@@ -168,6 +173,8 @@ class AnswerMarkView(View):
 
 
 class VoteView(View):
+
+    @transaction.atomic
     def post(self, request, pk):
         if request.user.is_authenticated():
             value = True if request.POST.get('value') == 'true' else False
@@ -201,6 +208,7 @@ class SingUpView(View):
         return render(request, self.template, {'form': form})
 
     @method_decorator(logout_required('qa:index'))
+    @transaction.atomic
     def post(self, request):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
@@ -220,6 +228,7 @@ class LoginView(View):
         return render(request, self.template, {'form': form})
 
     @method_decorator(logout_required('qa:index'))
+    @transaction.atomic
     def post(self, request):
         form = self.form_class(data=request.POST)
         if form.is_valid():
@@ -249,6 +258,7 @@ class SettingsView(View):
         return render(request, self.template, {'form': form, 'user': user})
 
     @method_decorator(login_required)
+    @transaction.atomic
     def post(self, request):
         user = request.user
         form = self.form_class(request.POST, request.FILES, instance=request.user)
