@@ -40,6 +40,16 @@ class SearchViewTests(TestCase):
             question = create_question(title=title, text=text, author=question_author)
             question.save(self.tags_data[title])
 
+    def test_empty_search(self):
+        response = self.client.get(reverse('qa:search') + '?q=question4')
+        self.assertContains(response, 'Couldn\'t find any matching `question4`')
+        self.assertQuerysetEqual(response.context['questions'], [])
+
+    def test_empty_search_by_tag(self):
+        response = self.client.get(reverse('qa:search') + '?q=tag:tag5')
+        self.assertContains(response, 'Couldn\'t find any question by tag')
+        self.assertQuerysetEqual(response.context['questions'], [])
+
     def test_search_by_title(self):
         response = self.client.get(reverse('qa:search') + '?q=question1')
         self.assertQuerysetEqual(response.context['questions'], ['<Question: question1>'])
