@@ -8,6 +8,7 @@ def logout_required(logout_redirect):
     Decorator for views that checks that the user is logged out, redirecting
     to the logout_redirect page.
     """
+
     def deco_logout(f):
         @wraps(f)
         def logout(request, *args, **kwargs):

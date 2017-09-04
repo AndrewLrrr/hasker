@@ -14,13 +14,13 @@ from qa.widgets import ClearableImageInput
 class UserSingUpForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2', 'avatar', )
+        fields = ('username', 'email', 'password1', 'password2', 'avatar',)
 
 
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('email', 'avatar', )
+        fields = ('email', 'avatar',)
 
     def __init__(self, *args, **kwargs):
         super(UserSettingsForm, self).__init__(*args, **kwargs)
@@ -32,7 +32,7 @@ class QuestionAskForm(forms.ModelForm):
 
     class Meta:
         model = Question
-        fields = ('title', 'text', 'tags', )
+        fields = ('title', 'text', 'tags',)
 
     def clean_tags(self):
         tags = self.cleaned_data.get('tags')
@@ -51,10 +51,10 @@ class QuestionAskForm(forms.ModelForm):
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
-        fields = ('text', )
+        fields = ('text',)
         labels = {
             'text': _('Your answer'),
         }
         widgets = {
-          'text': forms.Textarea(attrs={'rows': 5}),
+            'text': forms.Textarea(attrs={'rows': 5}),
         }

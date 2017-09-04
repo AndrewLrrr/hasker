@@ -19,8 +19,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from qa.fields import ContentTypeRestrictedFileField
 
-# TODO: Спросить у Станислава, есть ли возможность сгенерировать составной первичный ключ
-
 
 def unique_filename(instance, filename):
     ext = filename.split('.')[-1]

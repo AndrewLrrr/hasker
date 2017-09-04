@@ -162,7 +162,6 @@ class AskView(View):
 
 
 class AnswerMarkView(View):
-
     @transaction.atomic
     def post(self, request, pk):
         if request.user.is_authenticated():
@@ -173,7 +172,6 @@ class AnswerMarkView(View):
 
 
 class VoteView(View):
-
     @transaction.atomic
     def post(self, request, pk):
         if request.user.is_authenticated():
