@@ -35,13 +35,11 @@ $('a.mark').click(function (e) {
     }, function (response) {
         if (response['success']) {
             var needActivate = !$this.hasClass('active');
-            $('.answers').find('.mark').each(function () {
+            $('.answer-list').find('.mark').each(function () {
                 $(this).removeClass('active');
             });
             if (needActivate) {
                 $this.addClass('active');
-            } else {
-                $this.removeClass('active');
             }
         }
     });
