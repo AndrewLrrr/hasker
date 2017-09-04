@@ -6,8 +6,51 @@ from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 
-from qa.models import Question, Answer, User
+from qa.models import Question, Answer, User, SlugifyMixin
 from qa.views import QuestionVoteView, AnswerVoteView, AnswerMarkView
+
+
+# ---------------------------------------------------- Unit tests ---------------------------------------------------- #
+
+# Здесь хотелось ограничится исключительно юнит тестами, без создания моделей
+# Можно было сделать проще, но надо тянуть отдельную либу для мокинга
+class MockSlugifyMixin(SlugifyMixin):
+    is_slug_exists_cnt = 0
+
+    def get_slug_max_length(self):
+        return 50
+
+    def is_slug_exists(self):
+        self.is_slug_exists_cnt += 1
+        if self.is_slug_exists_cnt == 2:
+            return True
+        else:
+            return False
+
+
+class SlugifyMixinUnitTests(TestCase):
+    def test_slugify_can_cut_long_string(self):
+        model = MockSlugifyMixin()
+        string = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed vulputate convallis dui vitae faucibus'
+        expected_slug = 'lorem-ipsum-dolor-sit-amet-consectetur-adipiscing-'
+        self.assertEqual(expected_slug, model.slugify(string))
+
+    def test_slugify_can_remove_extra_characters_from_string(self):
+        model = MockSlugifyMixin()
+        string = 'Lorem ipsum dolor sit amet, consectetur adipiscing.'
+        expected_slug = 'lorem-ipsum-dolor-sit-amet-consectetur-adipiscing'
+        self.assertEqual(expected_slug, model.slugify(string))
+
+    def test_can_create_slugs_from_same_strings(self):
+        model = MockSlugifyMixin()
+        string = 'Lorem ipsum'
+        expected_slug1 = 'lorem-ipsum'
+        expected_slug2 = 'lorem-ipsum-1'
+        self.assertEqual(expected_slug1, model.slugify(string))
+        self.assertEqual(expected_slug2, model.slugify(string))
+
+
+# --------------------------------------------------- System tests --------------------------------------------------- #
 
 
 def create_question(author, title='Test question', text='Test question text'):

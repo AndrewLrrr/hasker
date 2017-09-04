@@ -41,6 +41,17 @@ class VoteMixin(object):
         return True
 
 
+class SlugifyMixin(object):
+    def slugify(self, string):
+        max_length = self.get_slug_max_length()
+        slug = orig = slugify(string)[:max_length]
+        for x in itertools.count(1):
+            if not self.is_slug_exists():
+                break
+            slug = '{}-{}'.format(orig[:max_length - len(str(x)) - 1], x)
+        return slug
+
+
 class QuestionManager(models.Manager):
     def new(self):
         return self.all().order_by('-pub_date')
@@ -100,7 +111,7 @@ class Tag(models.Model):
 
 
 @python_2_unicode_compatible
-class Question(VoteMixin, models.Model):
+class Question(VoteMixin, SlugifyMixin, models.Model):
     title = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(unique=True)
     text = models.TextField()
@@ -125,14 +136,11 @@ class Question(VoteMixin, models.Model):
     def create_vote(self, user, value):
         return QuestionVotes.objects.get_or_create(question=self, user=user, vote=value)
 
-    def slugify(self, string):
-        max_length = self._meta.get_field('slug').max_length
-        slug = orig = slugify(string)[:max_length]
-        for x in itertools.count(1):
-            if not Question.objects.filter(slug=self.slug).exists():
-                break
-            self.slug = '{}-{}'.format(orig[:max_length - len(str(x)) - 1], x)
-        return slug
+    def get_slug_max_length(self):
+        return self._meta.get_field('slug').max_length
+
+    def is_slug_exists(self):
+        return Question.objects.filter(slug=self.slug).exists()
 
     def save(self, tags=(), *args, **kwargs):
         if not self.pk:
