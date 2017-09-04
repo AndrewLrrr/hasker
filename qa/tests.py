@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.test import TestCase, RequestFactory
+from django.urls import reverse
 
 from qa.models import Question, Answer, User
 from qa.views import QuestionVoteView, AnswerVoteView, AnswerMarkView
@@ -13,6 +14,43 @@ def create_question(author, title='Test question', text='Test question text'):
 
 def create_answer(question, author, text='Test answer text'):
     return Answer.objects.create(text=text, question=question, author=author)
+
+
+class SearchViewTests(TestCase):
+    questions_data = {
+        'question1': 'text1',
+        'question2': 'text12',
+        'question3': 'text3',
+    }
+
+    tags_data = {
+        'question1': ('tag1', 'tag2',),
+        'question2': ('tag3',),
+        'question3': ('tag1',),
+    }
+
+    def setUp(self):
+        self.factory = RequestFactory()
+
+        question_author = User.objects.create_user(
+            username='test1', email='test1@eamil.com', password='top_secret'
+        )
+
+        for title, text in self.questions_data.items():
+            question = create_question(title=title, text=text, author=question_author)
+            question.save(self.tags_data[title])
+
+    def test_search_by_title(self):
+        response = self.client.get(reverse('qa:search') + '?q=question1')
+        self.assertQuerysetEqual(response.context['questions'], ['<Question: question1>'])
+
+    def test_search_by_text(self):
+        response = self.client.get(reverse('qa:search') + '?q=text1')
+        self.assertQuerysetEqual(response.context['questions'], ['<Question: question2>', '<Question: question1>'])
+
+    def test_search_by_tag(self):
+        response = self.client.get(reverse('qa:search') + '?q=tag:tag1')
+        self.assertQuerysetEqual(response.context['questions'], ['<Question: question3>', '<Question: question1>'])
 
 
 class AnswerMarkViewTests(TestCase):
