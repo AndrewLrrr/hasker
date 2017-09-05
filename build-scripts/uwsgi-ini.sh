@@ -14,7 +14,6 @@ socket = 127.0.0.1:9999
 logto = /var/log/$PROJECT_NAME.log
 vacuum = true
 die-on-term = true
-env=DJANGO_SETTINGS_MODULE=config.settings.production
 "
 
 if [[ -n ${PROJECT_NAME} && -n ${PROJECT_PATH} ]]; then
