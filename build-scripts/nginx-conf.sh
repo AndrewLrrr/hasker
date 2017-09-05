@@ -38,7 +38,7 @@ if [[ -n ${PROJECT_NAME} ]]; then
     echo "$BLOCK" > "/etc/nginx/sites-available/$PROJECT_NAME"
     ln -fs "/etc/nginx/sites-available/$PROJECT_NAME" "/etc/nginx/sites-enabled/$PROJECT_NAME"
     service nginx reload
-    echo "Nginx config `${PROJECT_NAME}` has been created"
+    echo "Nginx config has been created"
 else
     echo "Incorrect project name. Nginx config was not created"
     exit 1

@@ -19,7 +19,7 @@ env=DJANGO_SETTINGS_MODULE=config.settings.production
 
 if [[ -n ${PROJECT_NAME} && -n ${PROJECT_PATH} ]]; then
     echo "$BLOCK" > "/usr/local/etc/$PROJECT_NAME.ini"
-    echo "Uwsgi config `${PROJECT_NAME}` has been created"
+    echo "Uwsgi config has been created"
 else
     echo "Incorrect project name or project path. Uwsgi config was not created"
     exit 1
