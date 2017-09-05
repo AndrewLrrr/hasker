@@ -21,5 +21,12 @@ user=$USER
 password=$PASS
 "
 
-sudo echo "$BLOCK" > ~/.my.cnf
-sudo chmod 600 ~/.my.cnf
+if [[ -n ${USER} && -n ${PASS} ]]; then
+    echo "$BLOCK" > ~/.my.cnf
+    chmod 600 ~/.my.cnf
+
+    echo "User my.cnf has been created!"
+else
+    echo "Incorrect user or password. User my.cnf was not created"
+    exit 1
+fi

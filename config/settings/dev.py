@@ -7,9 +7,6 @@ SECRET_KEY = '-ki8y=tc=$e4f_hz2+rjv_q=bdj&j37-fys$_(qz05tik)^6f='
 DEBUG = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = '1025'
-EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'hasker@email.com'
 
 # Database
