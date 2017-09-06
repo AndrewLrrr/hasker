@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 PROJECT_NAME=$1
+DOMAIN=$2
+
+if [[ -z ${PROJECT_NAME} ]]; then
+    DOMAIN="localhost 127.0.0.1"
+fi
 
 BLOCK="
 upstream $PROJECT_NAME {
@@ -8,8 +13,12 @@ upstream $PROJECT_NAME {
 }
 server {
     listen       80;
-    listen       127.0.0.1;
-    server_name  _;
+    server_name  $DOMAIN;
+
+    charset utf-8;
+
+    access_log /var/log/nginx/$PROJECT_NAME-access.log combined;
+    error_log  /var/log/nginx/$PROJECT_NAME-error.log error;
 
     location /static/ {
         root /var/www/$PROJECT_NAME;

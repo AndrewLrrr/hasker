@@ -2,18 +2,26 @@
 
 PROJECT_NAME=$1
 PROJECT_PATH=$2
+CONFIG=$3
+DB_NAME=$4
+DB_PASSWORD=$5
+SECRET_KEY=$6
 
 BLOCK="
 [uwsgi]
 chdir=$PROJECT_PATH
 module=config.wsgi:application
-module = ip2w:application
 master = true
 processes = 5
 socket = 127.0.0.1:9999
 logto = /var/log/$PROJECT_NAME.log
 vacuum = true
 die-on-term = true
+env=DJANGO_SETTINGS_MODULE=${CONFIG}
+env=SECRET_KEY=${SECRET_KEY}
+env=DATABASE_NAME=${DB_NAME}
+env=DATABASE_USER=${DB_NAME}
+env=DATABASE_PASSWORD=${DB_PASSWORD}
 "
 
 if [[ -n ${PROJECT_NAME} && -n ${PROJECT_PATH} ]]; then

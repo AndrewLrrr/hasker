@@ -7,7 +7,6 @@ if [[ -n ${TMP_PASS} ]]; then
     debconf-set-selections <<< "mysql-server mysql-server/root_password password $TMP_PASS"
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $TMP_PASS"
     apt-get install -qq -y mysql-server-5.7
-
     echo "Mysql has been installed!"
 else
     echo "Incorrect temporary password. Mysql was not installed"
