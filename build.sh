@@ -32,9 +32,6 @@ apt-get install -y libmysqlclient-dev
 echo "Try to install Nginx and create config..."
 apt-get install -y nginx
 service nginx start
-if [[ -f /etc/nginx/sites-available/default ]]; then
-    rm /etc/nginx/sites-available/default
-fi
 build-scripts/nginx-conf.sh ${PROJECT_NAME}
 
 echo "Try to install and configure Uwsgi daemon..."
