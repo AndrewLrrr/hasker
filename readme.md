@@ -17,6 +17,8 @@ docker run --rm -it -p 8000:80 ubuntu /bin/bash
 apt-get update
 apt-get upgrade
 apt-get install -y git
+apt-get install -y make
+mkdir apps && cd apps
 git clone https://github.com/AndrewLrrr/hasker.git .
 ```
 
