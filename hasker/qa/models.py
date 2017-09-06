@@ -17,7 +17,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from qa.fields import ContentTypeRestrictedFileField
+from .fields import ContentTypeRestrictedFileField
 
 
 def unique_filename(instance, filename):

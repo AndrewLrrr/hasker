@@ -14,9 +14,6 @@ if [[ -z ${DOMAIN} ]]; then
 fi
 
 BLOCK="
-upstream $PROJECT_NAME {
-    server 127.0.0.1:9999;
-}
 server {
     listen       80;
     server_name  $DOMAIN;
@@ -26,17 +23,17 @@ server {
     access_log /var/log/nginx/$PROJECT_NAME-access.log combined;
     error_log  /var/log/nginx/$PROJECT_NAME-error.log error;
 
-    location /static/ {
-        root /var/www/$PROJECT_NAME;
+    location /static {
+        alias /var/www/$PROJECT_NAME/static;
     }
 
-    location /media/ {
-        root /var/www/$PROJECT_NAME;
+    location /media {
+        alias /var/www/$PROJECT_NAME/media;
     }
 
     location / {
         include    uwsgi_params;
-        uwsgi_pass $PROJECT_NAME;
+        uwsgi_pass unix:/run/uwsgi/$PROJECT_NAME.sock;
     }
 }
 "
@@ -48,6 +45,10 @@ if [[ -n ${PROJECT_NAME} ]]; then
 
     if [[ -h /etc/nginx/sites-enabled/${PROJECT_NAME} ]]; then
         rm /etc/nginx/sites-enabled/${PROJECT_NAME}
+    fi
+
+    if [[ ! -e /var/www/${PROJECT_NAME}/media ]]; then
+        mkdir /var/www/${PROJECT_NAME}/media
     fi
 
     echo "$BLOCK" > "/etc/nginx/sites-available/$PROJECT_NAME"

@@ -2,6 +2,8 @@ from .common import *
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
+ALLOWED_HOSTS = ['*']
+
 DEBUG = False
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
