@@ -7,7 +7,6 @@ BLOCK="
 Description=$PROJECT_NAME uWSGI daemon
 
 [Service]
-EnvironmentFile=-/usr/local/etc/.env.$PROJECT_NAME
 ExecStart=/usr/bin/bash -c 'uwsgi --ini /usr/local/etc/$PROJECT_NAME.ini'
 
 [Install]

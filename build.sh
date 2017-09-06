@@ -31,14 +31,16 @@ apt-get install -y libmysqlclient-dev
 
 echo "Try to install Nginx and create config..."
 apt-get install -y nginx
-service mysql start
+service nginx start
+if [[ -f /etc/nginx/sites-available/default ]]; then
+    rm /etc/nginx/sites-available/default
+fi
 build-scripts/nginx-conf.sh ${PROJECT_NAME}
 
 echo "Try to install and configure Uwsgi daemon..."
 pip install uwsgi
 build-scripts/uwsgi-ini.sh ${PROJECT_NAME} ${PROJECT_PATH} ${CONFIG} ${DB_USER} ${DB_USER_PASS} ${SECRET_KEY}
 # Looks like Docker has some problems with systemd...
-# build-scripts/uwsgi-env.sh ${PROJECT_NAME} ${CONFIG} ${SECRET_KEY} ${DB_USER} ${DB_USER_PASS}
 # build-scripts/uwsgi-service.sh ${PROJECT_NAME}
 
 echo "Try to collect static and run migrations..."

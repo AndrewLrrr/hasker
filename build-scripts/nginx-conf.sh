@@ -40,10 +40,6 @@ if [[ -n ${PROJECT_NAME} ]]; then
         rm /etc/nginx/sites-available/${PROJECT_NAME}
     fi
 
-    if [[ -f /etc/nginx/sites-enabled/${PROJECT_NAME} ]]; then
-        rm /etc/nginx/sites-enabled/${PROJECT_NAME}
-    fi
-
     echo "$BLOCK" > "/etc/nginx/sites-available/$PROJECT_NAME"
     ln -fs "/etc/nginx/sites-available/$PROJECT_NAME" "/etc/nginx/sites-enabled/$PROJECT_NAME"
     service nginx reload
