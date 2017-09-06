@@ -34,17 +34,16 @@ build-scripts/nginx-conf.sh ${PROJECT_NAME}
 
 SECRET_KEY="$(openssl rand -base64 50)"
 
-echo "Try to collect static and run migrations..."
-cd ${PROJECT_PATH}
-build-scripts/export-env.sh ${CONFIG} ${SECRET_KEY} ${DB_USER} ${DB_USER_PASS}
-python manage.py collectstatic
-python manage.py migrate
-
 echo "Try to install and configure Uwsgi daemon..."
-SECRET_KEY="$(openssl rand -base64 50)"
 pip install uwsgi
 build-scripts/uwsgi-ini.sh ${PROJECT_NAME} ${PROJECT_PATH}
 # Looks like Docker has some problems with systemd...
 # ./uwsgi-env.sh ${PROJECT_NAME} ${CONFIG} ${SECRET_KEY} ${DB_USER} ${DB_USER_PASS}
 # ./uwsgi-service.sh ${PROJECT_NAME}
 uwsgi --ini /usr/local/etc/${PROJECT_NAME}.ini &
+
+echo "Try to collect static and run migrations..."
+cd ${PROJECT_PATH}
+build-scripts/export-env.sh ${CONFIG} ${SECRET_KEY} ${DB_USER} ${DB_USER_PASS}
+python manage.py collectstatic
+python manage.py migrate
