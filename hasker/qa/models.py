@@ -9,6 +9,8 @@ from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -29,13 +31,13 @@ def unique_filename(instance, filename):
 class VoteMixin(object):
     def vote(self, user, value=False):
         try:
-            vote = self.get_vote(user)
+            vote = self.votes.get(user=user)
             if vote.vote != value:
                 vote.delete()
             else:
                 return False
         except ObjectDoesNotExist:
-            self.create_vote(user, value)
+            self.votes.create(user=user, vote=value)
         self.rating += 1 if value else -1
         self.save()
         return True
@@ -99,6 +101,14 @@ class User(AbstractUser):
         return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
 
 
+class Vote(models.Model):
+    user = models.ForeignKey(User)
+    vote = models.BooleanField(default=False)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
 @python_2_unicode_compatible
 class Tag(models.Model):
     name = models.CharField(_('Name'), max_length=50, unique=True)
@@ -120,7 +130,7 @@ class Question(VoteMixin, SlugifyMixin, models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     tags = models.ManyToManyField(Tag, related_name='question_tags')
-    votes = models.ManyToManyField(User, through='QuestionVotes', related_name='question_votes')
+    votes = GenericRelation(Vote, related_query_name='questions')
 
     objects = QuestionManager()
 
@@ -129,12 +139,6 @@ class Question(VoteMixin, SlugifyMixin, models.Model):
 
     def get_vote_url(self):
         return reverse('qa:question_vote', kwargs={'pk': self.pk})
-
-    def get_vote(self, user):
-        return QuestionVotes.objects.get(question=self, user=user)
-
-    def create_vote(self, user, value):
-        return QuestionVotes.objects.get_or_create(question=self, user=user, vote=value)
 
     def get_slug_max_length(self):
         return self._meta.get_field('slug').max_length
@@ -163,7 +167,7 @@ class Answer(VoteMixin, models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     question = models.ForeignKey(Question)
-    votes = models.ManyToManyField(User, through='AnswerVotes', related_name='answer_votes')
+    votes = GenericRelation(Vote, related_query_name='answers')
 
     objects = AnswerManager()
 
@@ -191,31 +195,3 @@ class Answer(VoteMixin, models.Model):
 
     def get_mark_url(self):
         return reverse('qa:answer_mark', kwargs={'pk': self.pk})
-
-    def get_vote(self, user):
-        return AnswerVotes.objects.get(answer=self, user=user)
-
-    def create_vote(self, user, value):
-        return AnswerVotes.objects.get_or_create(answer=self, user=user, vote=value)
-
-
-class Vote(models.Model):
-    user = models.ForeignKey(User)
-    vote = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
-
-
-class AnswerVotes(Vote):
-    answer = models.ForeignKey(Answer)
-
-    class Meta:
-        unique_together = (('user', 'answer'),)
-
-
-class QuestionVotes(Vote):
-    question = models.ForeignKey(Question)
-
-    class Meta:
-        unique_together = (('user', 'question'),)
