@@ -118,7 +118,7 @@ class Question(VoteMixin, SlugifyMixin, models.Model):
     rating = models.IntegerField(default=0)
     has_answer = models.BooleanField(default=False)
     pub_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
     tags = models.ManyToManyField(Tag, related_name='question_tags')
     votes = models.ManyToManyField(User, through='QuestionVotes', related_name='question_votes')
 
@@ -161,7 +161,7 @@ class Answer(VoteMixin, models.Model):
     rating = models.IntegerField(default=0)
     is_correct = models.BooleanField(default=False)
     pub_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
     question = models.ForeignKey(Question)
     votes = models.ManyToManyField(User, through='AnswerVotes', related_name='answer_votes')
 
