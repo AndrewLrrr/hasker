@@ -12,13 +12,13 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 def root(*dirs):
     base_dir = os.path.join(os.path.dirname(__file__), '..', '..')
     return os.path.abspath(os.path.join(base_dir, *dirs))
+
+
+BASE_DIR = root()
 
 
 # Quick-start development settings - unsuitable for production

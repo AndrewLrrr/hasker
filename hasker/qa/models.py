@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import hashlib
 import os
-import uuid
 
 import itertools
 from urllib import urlencode
@@ -23,8 +23,15 @@ from .fields import ContentTypeRestrictedFileField
 
 
 def unique_filename(instance, filename):
-    ext = filename.split('.')[-1]
-    filename = '{}.{}'.format(uuid.uuid4().hex, ext)
+    chunk_size = 65536
+    hasher = hashlib.md5()
+    instance.avatar.open()
+    buf = instance.avatar.read(chunk_size)
+    while len(buf) > 0:
+        hasher.update(buf)
+        buf = instance.avatar.read(chunk_size)
+    _, ext = os.path.splitext(filename)
+    filename = '{}{}'.format(hasher.hexdigest(), ext)
     return os.path.join('uploads', filename)
 
 
