@@ -91,7 +91,7 @@ class User(AbstractUser):
         max_upload_size=(settings.USER_AVATAR_MAX_SIZE_IN_MB * 1024 * 1024),
         upload_to=unique_filename,
         blank=True,
-        null=True
+        null=True,
     )
 
     def get_url(self):
@@ -99,14 +99,6 @@ class User(AbstractUser):
 
     def get_avatar_url(self):
         return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
-
-
-class Vote(models.Model):
-    user = models.ForeignKey(User)
-    vote = models.BooleanField(default=False)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
 
 
 @python_2_unicode_compatible
@@ -126,13 +118,23 @@ class Question(VoteMixin, SlugifyMixin, models.Model):
     slug = models.SlugField(unique=True)
     text = models.TextField()
     rating = models.IntegerField(default=0)
-    has_answer = models.BooleanField(default=False)
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
     tags = models.ManyToManyField(Tag, related_name='question_tags')
-    votes = GenericRelation(Vote, related_query_name='questions')
+    votes = GenericRelation('Vote', related_query_name='questions')
+    correct_answer = models.ForeignKey(
+        'Answer',
+        models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='correct_answer'
+    )
 
     objects = QuestionManager()
+
+    @property
+    def has_answer(self):
+        return self.correct_answer is not None
 
     def get_url(self):
         return reverse('qa:question', kwargs={'slug': self.slug})
@@ -163,11 +165,10 @@ class Question(VoteMixin, SlugifyMixin, models.Model):
 class Answer(VoteMixin, models.Model):
     text = models.TextField()
     rating = models.IntegerField(default=0)
-    is_correct = models.BooleanField(default=False)
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
-    question = models.ForeignKey(Question)
-    votes = GenericRelation(Vote, related_query_name='answers')
+    question = models.ForeignKey('Question')
+    votes = GenericRelation('Vote', related_query_name='answers')
 
     objects = AnswerManager()
 
@@ -175,19 +176,14 @@ class Answer(VoteMixin, models.Model):
         question = self.question
         if question.author != user:
             return False
-        if self.is_correct:
-            self.is_correct = False
-            question.has_answer = False
-        else:
-            if question.has_answer:
-                incorrect_answer = question.answer_set.get(is_correct=True)
-                incorrect_answer.is_correct = False
-                incorrect_answer.save()
+        if question.has_answer:
+            if question.correct_answer == self:
+                question.correct_answer = None
             else:
-                question.has_answer = True
-            self.is_correct = True
+                question.correct_answer = self
+        else:
+            question.correct_answer = self
         question.save()
-        self.save()
         return True
 
     def get_vote_url(self):
@@ -195,3 +191,11 @@ class Answer(VoteMixin, models.Model):
 
     def get_mark_url(self):
         return reverse('qa:answer_mark', kwargs={'pk': self.pk})
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(User)
+    vote = models.BooleanField(default=False)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')

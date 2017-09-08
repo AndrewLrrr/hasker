@@ -43,8 +43,8 @@
                         <a href="{{ answer.get_vote_url }}" class="vote-down vote glyphicon glyphicon-thumbs-down"></a>
                         {% if question.author == user %}
                             <a href="{{ answer.get_mark_url }}"
-                               class="mark {% if question.has_answer and answer.is_correct %} active {% endif %} glyphicon glyphicon-ok"></a>
-                        {% elif question.has_answer and answer.is_correct %}
+                               class="mark {% if question.has_answer and question.correct_answer == answer %} active {% endif %} glyphicon glyphicon-ok"></a>
+                        {% elif question.has_answer and question.correct_answer == answer %}
                             <span class="mark glyphicon glyphicon-ok"></span>
                         {% endif %}
                     </div>

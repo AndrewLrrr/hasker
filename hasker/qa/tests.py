@@ -168,13 +168,11 @@ class AnswerMarkViewTests(TestCase):
         request.user = self.answer_author
 
         self.assertEqual(self.question.has_answer, False)
-        self.assertEqual(self.answer.is_correct, False)
 
         response = AnswerMarkView.as_view()(request, self.answer.pk)
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(Question.objects.get(pk=self.question.pk).has_answer, False)
-        self.assertEqual(Answer.objects.get(pk=self.answer.pk).is_correct, False)
 
     def test_question_author_can_mark_answer(self):
         request = self.factory.post(self.answer.get_mark_url())
@@ -182,13 +180,13 @@ class AnswerMarkViewTests(TestCase):
         request.user = self.question_author
 
         self.assertEqual(self.question.has_answer, False)
-        self.assertEqual(self.answer.is_correct, False)
 
         response = AnswerMarkView.as_view()(request, self.answer.pk)
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(Question.objects.get(pk=self.question.pk).has_answer, True)
-        self.assertEqual(Answer.objects.get(pk=self.answer.pk).is_correct, True)
+        question = Question.objects.get(pk=self.question.pk)
+        self.assertEqual(question.has_answer, True)
+        self.assertEqual(self.answer, question.correct_answer)
 
     def test_question_author_can_unmark_answer(self):
         request = self.factory.post(self.answer.get_mark_url())
@@ -196,19 +194,18 @@ class AnswerMarkViewTests(TestCase):
         request.user = self.question_author
 
         self.assertEqual(self.question.has_answer, False)
-        self.assertEqual(self.answer.is_correct, False)
 
         response = AnswerMarkView.as_view()(request, self.answer.pk)
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(Question.objects.get(pk=self.question.pk).has_answer, True)
-        self.assertEqual(Answer.objects.get(pk=self.answer.pk).is_correct, True)
+        question = Question.objects.get(pk=self.question.pk)
+        self.assertEqual(question.has_answer, True)
+        self.assertEqual(self.answer, question.correct_answer)
 
         response = AnswerMarkView.as_view()(request, self.answer.pk)
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(Question.objects.get(pk=self.question.pk).has_answer, False)
-        self.assertEqual(Answer.objects.get(pk=self.answer.pk).is_correct, False)
 
 
 class VoteViewsTests(TestCase):
