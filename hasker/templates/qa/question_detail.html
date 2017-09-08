@@ -67,7 +67,7 @@
             </div>
         {% endfor %}
     </div>
-    {% include 'qa/snippets/pagination.html' %}
+    {% include 'snippets/pagination.html' %}
     {% if user.is_authenticated %}
         <div class="answer-form">
             {% if form.errors %}
@@ -79,7 +79,7 @@
             {% endif %}
             <form class="form-base" method="post" action="{{ question.get_url }}">
                 <input type="hidden" name="question_id" value="{{ question.pk }}">
-                {% include 'qa/snippets/form.html' %}
+                {% include 'snippets/form.html' %}
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Send</button>
                 </div>

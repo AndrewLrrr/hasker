@@ -2,8 +2,8 @@
 {% block title %}Log In{% endblock title %}
 {% block content %}
     <h1 class="text-center">Log in to continue with Hasker</h1>
-    <form class="form-base" method="post" action="{% url 'qa:login' %}">
-        {% include 'qa/snippets/form.html' %}
+    <form class="form-base" method="post" action="{% url 'accounts:login' %}">
+        {% include 'snippets/form.html' %}
         <div class="form-group">
             <div class="checkbox">
                 <label>

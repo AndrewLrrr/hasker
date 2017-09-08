@@ -6,7 +6,8 @@ from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 
-from qa.models import Question, Answer, User, SlugifyMixin
+from accounts.models import User
+from qa.models import Question, Answer, SlugifyMixin
 from qa.views import QuestionVoteView, AnswerVoteView, AnswerMarkView
 
 

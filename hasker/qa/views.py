@@ -4,10 +4,7 @@ from __future__ import unicode_literals
 import urllib
 
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.core.paginator import Paginator, EmptyPage
 from django.db import transaction
 from django.db.models import Q
@@ -17,10 +14,9 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from forms import UserSingUpForm, UserSettingsForm, QuestionAskForm, AnswerForm
-from qa.decorators import logout_required
-from qa.models import Question, Answer, User, Tag
-from qa.utils import new_answer_email_notify
+from forms import QuestionAskForm, AnswerForm
+from .models import Question, Answer, Tag
+from .utils import new_answer_email_notify
 
 
 class PaginationMixin(object):
@@ -194,86 +190,3 @@ class QuestionVoteView(VoteView):
 class AnswerVoteView(VoteView):
     def get_model(self):
         return Answer
-
-
-class SingUpView(View):
-    form_class = UserSingUpForm
-    template = 'qa/user_singup.html'
-
-    @method_decorator(logout_required('qa:index'))
-    def get(self, request):
-        form = self.form_class(None)
-        return render(request, self.template, {'form': form})
-
-    @method_decorator(logout_required('qa:index'))
-    @transaction.atomic
-    def post(self, request):
-        form = self.form_class(request.POST, request.FILES)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('qa:index')
-        return render(request, self.template, {'form': form})
-
-
-class LoginView(View):
-    form_class = AuthenticationForm
-    template = 'qa/user_login.html'
-
-    @method_decorator(logout_required('qa:index'))
-    def get(self, request):
-        form = self.form_class(None)
-        return render(request, self.template, {'form': form})
-
-    @method_decorator(logout_required('qa:index'))
-    @transaction.atomic
-    def post(self, request):
-        form = self.form_class(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            if not request.POST.get('remember_me', None):
-                request.session.set_expiry(0)
-            login(request, user)
-            return redirect('qa:index')
-        return render(request, self.template, {'form': form})
-
-
-class LogoutView(View):
-    @method_decorator(login_required)
-    def post(self, request):
-        logout(request)
-        return redirect('qa:index')
-
-
-class SettingsView(View):
-    form_class = UserSettingsForm
-    template = 'qa/user_settings.html'
-
-    @method_decorator(login_required)
-    def get(self, request):
-        user = request.user
-        form = self.form_class(instance=request.user)
-        return render(request, self.template, {'form': form, 'user': user})
-
-    @method_decorator(login_required)
-    @transaction.atomic
-    def post(self, request):
-        user = request.user
-        form = self.form_class(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            user.email = form.cleaned_data.get('email')
-            avatar = form.cleaned_data.get('avatar')
-            if avatar:
-                user.avatar = avatar
-            user.save()
-            messages.info(request, 'The changes have been saved!')
-            return redirect('qa:settings')
-        return render(request, self.template, {'form': form, 'user': user})
-
-
-class ProfileView(View):
-    template = 'qa/user_profile.html'
-
-    def get(self, request, username):
-        user = get_object_or_404(User, username=username)
-        return render(request, self.template, {'user': user})

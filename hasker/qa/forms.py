@@ -2,29 +2,11 @@
 import re
 
 from django.conf import settings
-from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from .models import User, Question, Answer
-from .widgets import ClearableImageInput
-
-
-class UserSingUpForm(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2', 'avatar',)
-
-
-class UserSettingsForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ('email', 'avatar',)
-
-    def __init__(self, *args, **kwargs):
-        super(UserSettingsForm, self).__init__(*args, **kwargs)
-        self.fields['avatar'].widget = ClearableImageInput()
+from .models import Question, Answer
 
 
 class QuestionAskForm(forms.ModelForm):

@@ -5,8 +5,8 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{% static 'qa/css/bootstrap.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'qa/css/style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
     {% block css %}{% endblock css %}
     <title>
         {% block title %}Hasker{% endblock title %}
@@ -47,14 +47,14 @@
                             {% if user.is_authenticated %}
                                 <div class="auth-user-block">
                                     <div class="user-avatar img-rounded">
-                                        <a href="{% url 'qa:settings' %}">
+                                        <a href="{% url 'accounts:settings' %}">
                                             <img src="{{ user.get_avatar_url }}" alt="">
                                         </a>
                                     </div>
                                     <div class="auth-user-control">
-                                        <a href="{% url 'qa:settings' %}"
+                                        <a href="{% url 'accounts:settings' %}"
                                            class="profile">{{ user.username|truncatechars:15 }}</a>
-                                        <form method="post" action="{% url 'qa:logout' %}" class="logout">
+                                        <form method="post" action="{% url 'accounts:logout' %}" class="logout">
                                             {% csrf_token %}
                                             <button type="submit">
                                                <span class="glyphicon glyphicon-log-out"></span>
@@ -63,8 +63,8 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <a href="{% url 'qa:login' %}" class="navbar-simple-text">Log In</a>
-                                <a href="{% url 'qa:singup' %}" class="btn btn-default navbar-btn">Sing Up</a>
+                                <a href="{% url 'accounts:login' %}" class="navbar-simple-text">Log In</a>
+                                <a href="{% url 'accounts:singup' %}" class="btn btn-default navbar-btn">Sing Up</a>
                             {% endif %}
                         </div>
                     </div>
@@ -91,8 +91,8 @@
     </div>
 </div>
 </body>
-<script type="text/javascript" src="{% static 'qa/js/jquery-3.2.1.js' %}"></script>
-<script type="text/javascript" src="{% static 'qa/js/bootstrap.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
 {% block js %}{% endblock js %}
-<script type="text/javascript" src="{% static 'qa/js/scripts.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
 </html>

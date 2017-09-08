@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'qa.apps.QaConfig',
+    'accounts.apps.AccountsConfig',
     'django.forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -111,9 +112,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    root('static'),
+]
+
 MEDIA_URL = '/media/'
 
-AUTH_USER_MODEL = 'qa.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = '/login/'
 
@@ -135,3 +140,5 @@ QUESTIONS_PER_PAGE = 20
 ANSWERS_PER_PAGE = 30
 
 TRENDING_QUESTIONS_LIMIT = 20
+
+BASE_REDIRECT = 'qa:index'
