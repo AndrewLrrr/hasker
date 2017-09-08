@@ -7,8 +7,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from qa.models import User, Question, Answer
-from qa.widgets import ClearableImageInput
+from .models import User, Question, Answer
+from .widgets import ClearableImageInput
 
 
 class UserSingUpForm(UserCreationForm):

@@ -15,7 +15,7 @@ WantedBy=multi-user.target
 
 if [[ -n ${PROJECT_NAME} ]]; then
     echo "$BLOCK" > "/etc/systemd/system/$PROJECT_NAME.service"
-    echo "Uwsgi service has been created and started"
+    echo "Uwsgi service has been created"
 else
     echo "Incorrect project name. Uwsgi service was not created"
     exit 1
