@@ -32,7 +32,9 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'qa.apps.QaConfig',
     'accounts.apps.AccountsConfig',
+    'api.apps.ApiConfig',
     'django.forms',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
