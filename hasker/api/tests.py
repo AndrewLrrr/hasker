@@ -78,3 +78,45 @@ class TrendingListTest(TestCase):
         serializer = QuestionSerializer(questions, many=True)
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class SearchListTest(TestCase):
+    questions_data = {
+        'question1': {'text': 'text1', 'rating': 3, 'days': 0},
+        'question12': {'text': 'text12', 'rating': 3, 'days': 1},
+        'question3': {'text': 'text3', 'rating': 2, 'days': 2},
+        'question4': {'text': 'text4', 'rating': 1, 'days': 3},
+        'question5': {'text': 'text5', 'rating': 0, 'days': 3},
+    }
+
+    def setUp(self):
+        question_author = User.objects.create_user(
+            username='test', email='test@eamil.com', password='top_secret'
+        )
+
+        for title, data in self.questions_data.items():
+            pub_date = timezone.now() + datetime.timedelta(days=data['days'])
+            question = Question.objects.create(
+                title=title,
+                text=data['text'],
+                rating=data['rating'],
+                author=question_author,
+            )
+            question.pub_date = pub_date
+            question.save()
+
+    def test_search_by_text(self):
+        response = self.client.get(reverse('api:search') + '?q=text1')
+        questions = Question.objects.filter(text__icontains='text1').order_by('-rating', '-pub_date')
+        serializer = QuestionSerializer(questions, many=True)
+        self.assertEqual(2, len(response.data['results']))
+        self.assertEqual(response.data['results'], serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_search_by_title(self):
+        response = self.client.get(reverse('api:search') + '?q=question1')
+        questions = Question.objects.filter(title__icontains='question1').order_by('-rating', '-pub_date')
+        serializer = QuestionSerializer(questions, many=True)
+        self.assertEqual(2, len(response.data['results']))
+        self.assertEqual(response.data['results'], serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
