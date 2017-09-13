@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.conf import settings
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 
-from .serializers import QuestionListSerializer
-
-
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 100
-    page_size_query_param = 'page_size'
-    max_page_size = 1000
+from paginators import QuestionsSetPagination
+from serializers import QuestionSerializer
 
 
 class QuestionList(ListAPIView):
-    serializer_class = QuestionListSerializer
+    serializer_class = QuestionSerializer
     model = serializer_class.Meta.model
-    pagination_class = StandardResultsSetPagination
+    pagination_class = QuestionsSetPagination
 
     def get_queryset(self):
         return self.model.objects.new()
+
+
+class TrendingList(ListAPIView):
+    serializer_class = QuestionSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        return self.model.objects.popular()[:settings.TRENDING_QUESTIONS_LIMIT]

@@ -13,8 +13,7 @@ from qa.views import QuestionVoteView, AnswerVoteView, AnswerMarkView
 
 # ---------------------------------------------------- Unit tests ---------------------------------------------------- #
 
-# Здесь хотелось ограничиться исключительно юнит тестами, без создания моделей
-# Можно было сделать проще, но надо тянуть отдельную либу для мокинга
+
 class MockSlugifyMixinModel(SlugifyMixin):
     is_slug_exists_cnt = 0
 
