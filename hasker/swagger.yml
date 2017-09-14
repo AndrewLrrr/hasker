@@ -1,0 +1,323 @@
+swagger: '2.0'
+
+info:
+  description: Описание реализации Hasker API
+  version: 0.1.0
+  title: Hasker API
+  contact:
+    email: larin.projects@gmail.com
+
+consumes:
+- application/json
+
+produces:
+- application/json
+
+paths:
+  /questions:
+    get:
+      summary: Список новых вопросов
+      operationId: questions
+      description: |
+        Список вопросов упорядоченых по дате создания.
+        По 20 вопросов на страницу.
+      parameters:
+      - in: query
+        name: page
+        description: Номер страницы.
+        required: false
+        type: integer
+      responses:
+        200:
+          description: Упорядоченный список вопросов.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Questions'
+        404:
+          description: Не верно указан номер страницы для пагинации.
+
+  /trending:
+    get:
+      summary: Получение списка популярных вопросов
+      operationId: trending
+      description: |
+        Список вопросов упорядоченых по популярности.
+        Лимит 20 вопросов.
+      responses:
+        200:
+          description: Упорядоченный список вопросов.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Questions'
+
+  /search:
+    get:
+      summary: Поиск вопросов
+      operationId: search
+      description: |
+        Получение списка вопросов по заданной поисковой строке.
+        Вопросы упорядочены по рейтингу и дате создания.
+        По 20 вопросов на страницу.
+      parameters:
+      - name: q
+        in: query
+        description: Строка запроса.
+        required: true
+        type: string
+      responses:
+        200:
+          description: Упорядоченный список вопросов.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Questions'
+
+  /tags/{id}/questions:
+    get:
+      summary: Поиск вопросов по тегу
+      operationId: tagsQuestions
+      description: |
+        Получение списка вопросов по тегу.
+        Вопросы упорядочены по рейтингу и дате создания.
+        По 20 вопросов на страницу.
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор тега.
+        required: true
+        type: number
+        format: int64
+      responses:
+        200:
+          description: Упорядоченный список вопросов.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Questions'
+
+  /questions/{id}/answers:
+    get:
+      summary: Получение списка ответов к вопросу
+      operationId: answers
+      description: |
+        Получение списка ответов к вопросу.
+        Ответы упорядочены по рейтингу и дате создания.
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор вопроса.
+        required: true
+        type: number
+        format: int64
+      responses:
+        200:
+          description: Упорядоченный список ответов.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Answers'
+        404:
+          description: Вопрос не существует.
+
+  /api-token-auth:
+    post:
+      summary: JWT авторизация
+      operationId: apiTokenAuth
+      description: JWT авторизация.
+      parameters:
+      - name: body
+        in: body
+        description: Логин и пароль пользователя.
+        required: true
+        schema:
+          $ref: '#/definitions/ApiTokenAuth'
+      responses:
+        200:
+          description: Пользователь авторизован.
+        400:
+          description: Пользователь с указанным логином и паролем не найден.
+
+  /questions/{id}/vote:
+    post:
+      summary: Проголосовать за вопрос
+      description: |
+        Голосование за вопрос.
+        Пользователь может добавить только один положительный или отрицательный голос.
+        При этом есть возможность переголосовать.
+      operationId: questionVote
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор голосования true или false.
+        required: true
+        type: number
+        format: identity
+      - name: value
+        in: body
+        description: Отданный голос.
+        required: true
+        schema:
+          $ref: '#/definitions/Vote'
+      responses:
+        201:
+          description: Информация о общем числе голосов.
+        401:
+          description: Пользователь не авторизован.
+        404:
+          description: Вопрос не существует.
+
+  /answers/{id}/vote:
+    post:
+      summary: Проголосовать за ответ
+      description: |
+        Голосование за ответ.
+        Пользователь может добавить только один положительный или отрицательный голос.
+        При этом есть возможность переголосовать.
+      operationId: answerVote
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор голосования true или false.
+        required: true
+        type: number
+        format: identity
+      - name: value
+        in: body
+        description: Отданный голос.
+        required: true
+        schema:
+          $ref: '#/definitions/Vote'
+      responses:
+        201:
+          description: Информация о общем числе голосов.
+        401:
+          description: Пользователь не авторизован.
+        404:
+          description: Ответ не существует.
+
+definitions:
+  Question:
+    description: Вопрос.
+    type: object
+    properties:
+      title:
+        type: string
+        format: text
+        description: Заголовок вопроса.
+        example: How is Python?
+        x-isnullable: false
+      text:
+        type: string
+        format: text
+        description: Текст вопроса.
+        example: How good is Python?
+        x-isnullable: false
+      rating:
+        type: number
+        format: int64
+        description: Рейтинг вопроса.
+        readOnly: true
+        x-isnullable: false
+      pub_date:
+        type: string
+        format: date-time
+        description: Дата публикации вопроса.
+        readOnly: true
+        x-isnullable: false
+      author:
+        type: string
+        format: identity
+        description: Автор вопроса.
+        example: Username
+        x-isnullable: false
+      correct_answer:
+        type: number
+        format: int64
+        description: Идентификатор корректного ответа на вопрос иначе null
+        readOnly: true
+        x-isnullable: true
+      tags:
+        $ref: '#/definitions/Tags'
+
+  Questions:
+    type: array
+    items:
+      $ref: '#/definitions/Question'
+
+  Tag:
+    description: Тег
+    type: object
+    properties:
+      name:
+        type: string
+        format: text
+        description: Имя тега.
+        example: python?
+        readOnly: true
+        x-isnullable: false
+
+  Tags:
+    type: array
+    items:
+      $ref: '#/definitions/Tag'
+
+  Answer:
+    description: Ответ.
+    type: object
+    properties:
+      text:
+        type: string
+        format: text
+        description: Текст ответа.
+        example: I admire Python for the way it let's me express my code in fewer lines.
+        x-isnullable: false
+      author:
+        type: string
+        format: identity
+        description: Автор ответа.
+        example: Username
+        x-isnullable: false
+      rating:
+        type: number
+        format: int64
+        description: Рейтинг ответа.
+        readOnly: true
+        x-isnullable: false
+      created:
+        type: string
+        format: date-time
+        description: Дата создания ответа.
+        readOnly: true
+        x-isnullable: false
+
+  Answers:
+    type: array
+    items:
+      $ref: '#/definitions/Answer'
+
+  Vote:
+    type: object
+    description: Текущий рейтинг.
+    properties:
+      value:
+        type: number
+        format: int64
+        description: Количество голосов.
+        x-isnullable: false
+
+  ApiTokenAuth:
+    required: [username, password]
+    properties:
+      username:
+        type: string
+        minLength: 1
+      password:
+        type: string
+        minLength: 8
+
+basePath: /api
+
+schemes:
+ - http
