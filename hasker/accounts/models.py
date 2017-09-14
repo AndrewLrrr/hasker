@@ -58,4 +58,4 @@ class User(AbstractUser):
         return reverse('accounts:profile', kwargs={'username': self.username})
 
     def get_avatar_url(self):
-        return self.avatar.url if self.avatar else staticfiles_storage.url('qa/img/avatar.png')
+        return self.avatar.url if self.avatar else staticfiles_storage.url('img/avatar.png')
