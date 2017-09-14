@@ -13,6 +13,7 @@ from rest_framework import status
 from api.serializers import QuestionSerializer, AnswerSerializer
 from accounts.models import User
 from qa.models import Question, Answer, Tag
+from rest_framework.test import APIClient
 
 
 class QuestionListTest(TestCase):
@@ -112,7 +113,7 @@ class SearchListTest(TestCase):
             .filter(text__icontains='text1') \
             .order_by('-rating', '-pub_date')[:settings.QUESTIONS_PER_PAGE]
         serializer = QuestionSerializer(questions, many=True)
-        self.assertEqual(2, len(response.data['results']))
+        self.assertEqual(len(response.data['results']), 2)
         self.assertEqual(response.data['results'], serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -122,7 +123,7 @@ class SearchListTest(TestCase):
             .filter(title__icontains='question1') \
             .order_by('-rating', '-pub_date')[:settings.QUESTIONS_PER_PAGE]
         serializer = QuestionSerializer(questions, many=True)
-        self.assertEqual(2, len(response.data['results']))
+        self.assertEqual(len(response.data['results']), 2)
         self.assertEqual(response.data['results'], serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -180,7 +181,10 @@ class AnswerListTest(TestCase):
 
     def test_get_question_answers(self):
         question_id = 1
-        response = self.client.get(reverse('api:answers', kwargs={'pk': question_id}))
+        response = self.client.get(
+            reverse('api:answers', kwargs={'pk': question_id}),
+            content_type='application/json'
+        )
         question = Question.objects.get(pk=question_id)
         answers = question.answer_set.all().order_by('-rating', '-pub_date')[:settings.ANSWERS_PER_PAGE]
         serializer = AnswerSerializer(answers, many=True)
@@ -188,7 +192,10 @@ class AnswerListTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_404_for_not_exist_question(self):
-        response = self.client.get(reverse('api:answers', kwargs={'pk': 15}))
+        response = self.client.get(
+            reverse('api:answers', kwargs={'pk': 15}),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -223,15 +230,21 @@ class TagSearchListTest(TestCase):
 
     def test_get_questions_by_tag(self):
         tag = Tag.objects.get(name='tag1')
-        response = self.client.get(reverse('api:tags_questions', kwargs={'pk': tag.pk}))
+        response = self.client.get(
+            reverse('api:tags_questions', kwargs={'pk': tag.pk}),
+            content_type='application/json'
+        )
         questions = tag.question_tags.all().order_by('-rating', '-pub_date')[:settings.QUESTIONS_PER_PAGE]
         serializer = QuestionSerializer(questions, many=True)
-        self.assertEqual(2, len(response.data['results']))
+        self.assertEqual(len(response.data['results']), 2)
         self.assertEqual(response.data['results'], serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_404_for_not_exist_question(self):
-        response = self.client.get(reverse('api:tags_questions', kwargs={'pk': 15}))
+        response = self.client.get(
+            reverse('api:tags_questions', kwargs={'pk': 15}),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -257,3 +270,166 @@ class ObtainJwtTokenTest(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class VoteViewsTests(TestCase):
+    def setUp(self):
+        self.csrf_client = APIClient(enforce_csrf_checks=True)
+
+        self.question_author = User.objects.create_user(
+            username='test1', email='test1@eamil.com', password='top_secret'
+        )
+
+        self.answer_author = User.objects.create_user(
+            username='test2', email='test2@eamil.com', password='top_secret'
+        )
+
+        self.question = Question.objects.create(
+            title='question1',
+            text='text1',
+            rating=0,
+            author=self.question_author,
+        )
+
+        self.answer = Answer.objects.create(
+            text='answer1',
+            rating=0,
+            author=self.answer_author,
+            question=self.question,
+        )
+
+        token_response = self.client.post(
+            reverse('api:api_token_auth'),
+            data=json.dumps({'username': 'test1', 'password': 'top_secret'}),
+            content_type='application/json'
+        )
+
+        self.question_author_token = token_response.data.get('token')
+
+        token_response = self.client.post(
+            reverse('api:api_token_auth'),
+            data=json.dumps({'username': 'test2', 'password': 'top_secret'}),
+            content_type='application/json'
+        )
+
+        self.answer_author_token = token_response.data.get('token')
+
+    def test_unauthorized_user_can_not_vote_for_question(self):
+        response = self.client.post(
+            reverse('api:question_vote', kwargs={'pk': self.question.pk}),
+            data=json.dumps({'value': 'true'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthorized_user_can_not_for_vote_for_answer(self):
+        response = self.client.post(
+            reverse('api:answer_vote', kwargs={'pk': self.answer.pk}),
+            data=json.dumps({'value': 'true'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def make_question_vote_request(self, value):
+        return self.csrf_client.post(
+            reverse('api:question_vote', kwargs={'pk': self.question.pk}),
+            {'value': value},
+            HTTP_AUTHORIZATION='JWT {}'.format(self.answer_author_token)
+        )
+
+    def test_authorized_user_can_do_only_one_question_vote_up(self):
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 0)
+
+        response = self.make_question_vote_request('true')
+
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 1)
+        self.assertEqual(response.data.get('rating'), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.make_question_vote_request('true')
+
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 1)
+        self.assertEqual(response.data.get('rating'), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_authorized_user_can_do_only_one_question_vote_down(self):
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 0)
+
+        response = self.make_question_vote_request('false')
+
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, -1)
+        self.assertEqual(response.data.get('rating'), -1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.make_question_vote_request('false')
+
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, -1)
+        self.assertEqual(response.data.get('rating'), -1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_authorized_user_can_do_question_vote_toggle(self):
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 0)
+
+        response = self.make_question_vote_request('true')
+
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 1)
+        self.assertEqual(response.data.get('rating'), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.make_question_vote_request('false')
+
+        self.assertEqual(Question.objects.get(pk=self.question.pk).rating, 0)
+        self.assertEqual(response.data.get('rating'), 0)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def make_answer_vote_request(self, value):
+        return self.csrf_client.post(
+            reverse('api:answer_vote', kwargs={'pk': self.answer.pk}),
+            {'value': value},
+            HTTP_AUTHORIZATION='JWT {}'.format(self.question_author_token)
+        )
+
+    def test_authorized_user_can_do_only_one_answer_vote_up(self):
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 0)
+
+        response = self.make_answer_vote_request('true')
+
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 1)
+        self.assertEqual(response.data.get('rating'), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.make_answer_vote_request('true')
+
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 1)
+        self.assertEqual(response.data.get('rating'), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_authorized_user_can_do_only_one_answer_vote_down(self):
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 0)
+
+        response = self.make_answer_vote_request('false')
+
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, -1)
+        self.assertEqual(response.data.get('rating'), -1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.make_answer_vote_request('false')
+
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, -1)
+        self.assertEqual(response.data.get('rating'), -1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_authorized_user_can_do_answer_vote_toggle(self):
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 0)
+
+        response = self.make_answer_vote_request('true')
+
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 1)
+        self.assertEqual(response.data.get('rating'), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.make_answer_vote_request('false')
+
+        self.assertEqual(Answer.objects.get(pk=self.answer.pk).rating, 0)
+        self.assertEqual(response.data.get('rating'), 0)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)

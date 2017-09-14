@@ -21,3 +21,8 @@ class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ('text', 'rating', 'pub_date', 'author')
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField()
+

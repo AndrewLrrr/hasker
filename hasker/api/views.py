@@ -2,13 +2,19 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Q
+from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from qa.models import Question, Tag
+from qa.models import Answer, Question, Tag
 from paginators import QuestionListPagination, AnswerListPagination
-from serializers import QuestionSerializer, AnswerSerializer
+from serializers import QuestionSerializer, AnswerSerializer, VoteSerializer
 
 
 class QuestionList(ListAPIView):
@@ -57,3 +63,32 @@ class TagSearchList(QuestionList):
         except Tag.DoesNotExist:
             raise NotFound()
         return tag.question_tags.popular()
+
+
+class VoteView(APIView):
+    serializer_class = VoteSerializer
+    authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    @transaction.atomic
+    def post(self, request, pk):
+        value = True if request.data.get('value') == 'true' else False
+        try:
+            entity = self.get_model().objects.get(id=pk)
+        except self.get_model().DoesNotExist:
+            raise NotFound()
+        entity.vote(request.user, value)
+        return Response({'rating': entity.rating}, status=status.HTTP_201_CREATED)
+
+    def get_model(self):
+        raise NotImplementedError('Model needs to be defined by sub-class')
+
+
+class QuestionVote(VoteView):
+    def get_model(self):
+        return Question
+
+
+class AnswerVote(VoteView):
+    def get_model(self):
+        return Answer
