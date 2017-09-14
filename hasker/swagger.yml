@@ -104,6 +104,7 @@ paths:
       description: |
         Получение списка ответов к вопросу.
         Ответы упорядочены по рейтингу и дате создания.
+        По 30 ответов на страницу.
       parameters:
       - name: id
         in: path
@@ -303,8 +304,8 @@ definitions:
     properties:
       value:
         type: number
-        format: int64
-        description: Количество голосов.
+        format: int32
+        description: Общее количество голосов.
         x-isnullable: false
 
   ApiTokenAuth:
