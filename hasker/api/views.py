@@ -6,7 +6,7 @@ from django.db.models import Q
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
 
-from qa.models import Question
+from qa.models import Question, Tag
 from paginators import QuestionListPagination, AnswerListPagination
 from serializers import QuestionSerializer, AnswerSerializer
 
@@ -30,7 +30,7 @@ class TrendingList(ListAPIView):
 
 class SearchList(QuestionList):
     def get_queryset(self):
-        search_query = self.request.GET.get('q')
+        search_query = self.request.GET.get('q')[:255]
         if not search_query:
             return Question.objects.none()
         query = Q(title__icontains=search_query) | Q(text__icontains=search_query)
@@ -48,3 +48,12 @@ class AnswerList(ListAPIView):
         except Question.DoesNotExist:
             raise NotFound()
         return question.answer_set.popular()
+
+
+class TagSearchList(QuestionList):
+    def get_queryset(self):
+        try:
+            tag = Tag.objects.get(id=self.kwargs.get('pk'))
+        except Tag.DoesNotExist:
+            raise NotFound()
+        return tag.question_tags.popular()
