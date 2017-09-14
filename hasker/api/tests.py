@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import json
 
 from django.conf import settings
 from django.test import TestCase
@@ -232,3 +233,27 @@ class TagSearchListTest(TestCase):
     def test_get_404_for_not_exist_question(self):
         response = self.client.get(reverse('api:tags_questions', kwargs={'pk': 15}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class ObtainJwtTokenTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='test', email='test@eamil.com', password='top_secret'
+        )
+
+    def test_api_token_generate(self):
+        response = self.client.post(
+            reverse('api:api_token_auth'),
+            data=json.dumps({'username': 'test', 'password': 'top_secret'}),
+            content_type='application/json'
+        )
+        self.assertRegexpMatches(response.data.get('token'), r'[^\s]+')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_not_existing_user_api_token_generate_failure(self):
+        response = self.client.post(
+            reverse('api:api_token_auth'),
+            data=json.dumps({'username': 'test', 'password': 'incorrect_secret'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

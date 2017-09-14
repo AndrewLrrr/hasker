@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from rest_framework_jwt.views import obtain_jwt_token
 
 from .views import *
 
@@ -9,4 +10,5 @@ urlpatterns = [
     url(r'^search/?$', SearchList.as_view(), name='search'),
     url(r'^questions/(?P<pk>[\d]+)/answers/$', AnswerList.as_view(), name='answers'),
     url(r'^tags/(?P<pk>[\d]+)/questions/$', TagSearchList.as_view(), name='tags_questions'),
+    url(r'^api-token-auth/', obtain_jwt_token, name='api_token_auth'),
 ]
